@@ -1,0 +1,28 @@
+ID;CardType;Name;Description;ImageName;damage;HasEffect;EffectType;CountType;HunterDream;Transform;Immune
+101;1;Saw Cleaver;*;*;1;0;0;0;0;0;0
+102;1;Hunter's Axe;*;*;2;0;0;0;0;0;0
+103;1;Church Hammer;*;*;4;0;0;0;0;0;0
+104;1;Bloodletter;Instant Effect: Deal 2 damage to hunters who haven't played a weapon.;*;2;1;1;0;0;0;0
+105;1;Boom Hammer;Instant Effect: Deal 1 damage to everyone.;*;4;1;1;0;0;0;0
+106;1;Tonitrus;Instant Effect: Each hunter that played a ranged weapon, gives you 1 unbanked point.;*;3;1;1;0;0;0;0
+107;1;Blades of Mercy;Instant Effect: Heal 1 health and plus 2 for each melee weapon in your used pile.;*;2;1;1;1;0;0;0
+108;1;Cosmic Parasite;Instant Effect: Deal 1 damage to the other hunters.;*;2;1;1;0;0;0;0
+109;1;Threaded Cane;You suffer 1 less damage.;*;2;1;2;0;0;0;0
+201;2;Hunter's Pistol;If you're the only one to play this, you attack in the Instant Effects phase.;*;1;1;1;0;0;0;0
+202;2;Evelyn;Instant Effect: If you can discard 1 unbanked point, you deal +2 damage.;*;2;1;1;0;0;0;0
+203;2;Stone Fist;Instant Effect: If you're the only one to play a ranged weapon, you're immune to damage this round.;*;3;1;1;0;0;0;0
+204;2;Flamethrower;Hunters that played melee weapons take double damage.;*;2;1;2;0;0;0;0
+205;2;Rosmarinus;Hunters that played ranged weapons take double damage.;*;2;1;2;0;0;0;0
+206;2;Church Cannon;Instant Effect: Deal 2 unavoidable damage to the other hunters.;*;2;1;1;0;0;0;0
+207;2;Cyclic Pistol;You're immune to damage this round.;*;2;1;2;0;0;0;1
+208;2;Blunderbass;Hunters that player a melee weapon deal 1 less damage.;*;2;1;1;0;0;0;0
+209;2;Gatling Gun;Instant Effect: Deal damage: 2 to melee weapons, 1 to ragned weapons.;*;2;1;1;0;0;0;0
+210;2;The Cannon;Instant Effect: Deal 1 damage to the other hunters.;*;3;1;1;0;0;0;0
+301;3;Blood Vial;Instant Effect: Heal 2 health and bank your points.;*;0;1;1;0;0;0;0
+302;3;Hunter's Bone;You deal damage equal to the number of unbanked points.;*;0;1;4;3;0;0;0
+303;3;Lightning Paper;You deal damage equal to the number of melee cards in the used pile.;*;0;1;4;1;0;0;0
+304;3;Fire Paper;You deal damage equal to the number of ranged cards in the used pile.;*;0;1;4;2;0;0;0
+305;3;Beast Cocktail;Instant Effect: Increase the enemy's health by the number of players.;*;4;1;1;0;0;0;0
+306;3;Molotov Cocktail;Instant Effect: Deal 1 damage to everything.;*;0;1;1;0;0;0;0
+401;0;Hunter's Dream;Half down taken damage. Bank points, recover used cards and choose a new one.;*;0;1;2;0;1;0;0
+402;0;Transform Weapon;Transforms your weapon.;*;0;1;1;0;0;1;0

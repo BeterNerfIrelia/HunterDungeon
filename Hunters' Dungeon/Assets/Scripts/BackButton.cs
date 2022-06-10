@@ -34,6 +34,11 @@ public class BackButton : MonoBehaviourPunCallbacks
                     SceneManager.LoadScene("MainMenu");
                     break;
                 }
+            case "OfflineGame":
+                {
+                    SceneManager.LoadScene("OfflineMenu");
+                    break;
+                }
         }
     }
 

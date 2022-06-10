@@ -18,9 +18,20 @@ public class PlayerPrefab : MonoBehaviour
 
     public GameObject trophies;
 
+    public GameObject cardSpace;
+    public GameObject cardPrefab;
+
+
+    List<CardOffline> playerCards = new List<CardOffline>();
+    List<GameObject> objectCards = new List<GameObject>();
+
     private void Start()
     {
         trophies.SetActive(false);
+        cardSpace = SearchExtension.Search(transform.parent.parent.parent, "PlayerCards").gameObject;
+        cardSpace.SetActive(false);
+        for (int i = 0; i < cardSpace.transform.childCount; ++i)
+            objectCards.Add(cardSpace.transform.GetChild(i).gameObject);
     }
 
     public void UpdatePlayer(PlayerOffline player)
@@ -34,6 +45,22 @@ public class PlayerPrefab : MonoBehaviour
 
         playerHealth.text = player.health.ToString();
         playerName.text = player.name;
+
+    }
+
+    public void HandleShowCards(PlayerOffline player)
+    {
+        if (playerCards.Count != player.deck.Count)
+            GetPlayerCards(player);
+        if (cardSpace.activeInHierarchy)
+        {
+            cardSpace.SetActive(false);
+        }
+        else
+        {
+            cardSpace.SetActive(true);
+            HandleObjectCards(player);
+        }
     }
 
     public void ClickOnTrophies()
@@ -42,5 +69,22 @@ public class PlayerPrefab : MonoBehaviour
             trophies.SetActive(false);
         else
             trophies.SetActive(true);
+    }
+
+    void GetPlayerCards(PlayerOffline player)
+    {
+        playerCards.Clear();
+        playerCards = new List<CardOffline>(player.deck);
+    }
+
+    void HandleObjectCards(PlayerOffline player)
+    {
+        for (int i = 0; i < objectCards.Count; ++i)
+            objectCards[i].SetActive(false);
+        for (int i = 0; i < player.deck.Count; ++i)
+        {
+            objectCards[i].SetActive(true);
+            objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(player.deck[i], player.name);
+        }
     }
 }

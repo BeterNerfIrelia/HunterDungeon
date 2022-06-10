@@ -67,6 +67,8 @@ public class OfflineLobbyManager : MonoBehaviour
 
     public void StartButton()
     {
+        OffGameManager.staticPlayers.Clear();
+        OffGameManager.staticPlayers = new List<PlayerOffline>();
         bool canStart = true;
         for(int i=0;i<activePlayers;++i)
         {
@@ -83,7 +85,7 @@ public class OfflineLobbyManager : MonoBehaviour
         for(int i=0;i<activePlayers;++i)
         {
             OffPlayer p = players[i].GetComponent<OffPlayer>();
-            OffGameManager.players.Add(new PlayerOffline(i+1, p.playerName, p.bot)); 
+            OffGameManager.staticPlayers.Add(new PlayerOffline(i+1, p.playerName, p.bot)); 
         }
         UnityEngine.SceneManagement.SceneManager.LoadScene(5);
     }

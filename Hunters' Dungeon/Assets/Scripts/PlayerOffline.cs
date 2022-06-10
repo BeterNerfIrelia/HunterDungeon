@@ -16,6 +16,7 @@ public class PlayerOffline
     public int bankedPoints;
 
     public int chosenCard = -1;
+    public int prevChosenCard = -1;
     public bool hasClickedOnCard = false;
     public bool isDead = false;
 
@@ -39,6 +40,36 @@ public class PlayerOffline
 
         InitializeTrophies();
         InitializeInfo();
+    }
+
+    public bool TakeDamage(int value)
+    {
+        if (!OffGameManager.firstRound)
+        {
+            if (card.isImmune)
+                value = 0;
+            if (card.isHunterDream)
+                value /= 2;
+        }
+
+        if(value >= health)
+        {
+            health = 0;
+            unbankedPoints = 0;
+            isDead = true;
+            return isDead;
+        }
+
+        health -= value;
+
+        return isDead;
+    }
+
+    public void ChooseCard()
+    {
+        card = new CardOffline(deck[chosenCard]);
+        deck.RemoveAt(chosenCard);
+        discardedCards.Add(new CardOffline(card));
     }
 
     void InitializeTrophies()
