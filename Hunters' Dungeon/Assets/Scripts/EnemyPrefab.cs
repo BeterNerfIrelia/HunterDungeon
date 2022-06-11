@@ -60,6 +60,11 @@ public class EnemyPrefab : MonoBehaviour
         playerCard.GetComponentInChildren<CardPrefab>(true).UpdateCard(player);
     }
 
+    public void DisableCard()
+    {
+        playerCard.SetActive(false);
+    }
+
     public void UpdateDice()
     {
         if (!dice.activeInHierarchy)

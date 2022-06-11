@@ -48,4 +48,24 @@ public class Enemy
         isBoss = enemy.isBoss;
         isFinalBoss = enemy.isFinalBoss;
     }
+
+    public bool TakeDamage(PlayerOffline player)
+    {
+        if (isDead)
+            return true;
+
+        int fullPoints = player.card.damage;
+        int points = health < fullPoints ? health : fullPoints;
+        health -= points;
+        player.hasAttacked = true;
+        player.unbankedPoints += points;
+
+        if (health <= 0)
+        {
+            OffGameManager.enemies.RemoveEnemy();
+            isDead = true;
+            return true;
+        }
+        return false;
+    }
 }

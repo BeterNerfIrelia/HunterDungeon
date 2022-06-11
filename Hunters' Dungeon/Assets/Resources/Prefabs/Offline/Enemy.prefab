@@ -306,7 +306,7 @@ MonoBehaviour:
   diceImage: {fileID: 409361337156648122}
   rollText: {fileID: 817818986066977781}
   rollValue: {fileID: 6539752218623284389}
-  diceButton: {fileID: 0}
+  diceButton: {fileID: 4439165580596873386}
   initialSprite: {fileID: 21300000, guid: 4593b337d9f872547b779e578286c2cf, type: 3}
   rollSprite: {fileID: 21300000, guid: 2701a2f55812f044ca3de9689ca5dde3, type: 3}
 --- !u!1 &2816608613945285301

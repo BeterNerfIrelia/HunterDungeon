@@ -27,22 +27,41 @@ public enum State
     HUNTER_ATTACK4,
     HUNTER_ATTACK5,
     ENEMY_ESCAPES,
+    HUNTER_DREAM,
     HUNTER_DREAM1,
     HUNTER_DREAM2,
     HUNTER_DREAM3,
     HUNTER_DREAM4,
     HUNTER_DREAM5,
+    HUNTER_DREAM_DISCARD,
     HUNTER_DREAM_DISCARD1,
     HUNTER_DREAM_DISCARD2,
     HUNTER_DREAM_DISCARD3,
     HUNTER_DREAM_DISCARD4,
     HUNTER_DREAM_DISCARD5,
+    ROUND_END,
     FINAL_SCORES,
     GAME_OVER
 }
 
 public class StateHandler
 {
+
+    public static bool IsChoosingState(State state)
+    {
+        switch(state)
+        {
+            case State.CHOOSE_CARD1:
+            case State.CHOOSE_CARD2:
+            case State.CHOOSE_CARD3:
+            case State.CHOOSE_CARD4:
+            case State.CHOOSE_CARD5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static State ChangeState(State state)
     {
         switch(state)
@@ -67,6 +86,52 @@ public class StateHandler
                 {
                     return State.REVEAL_CARDS;
                 }
+            case State.HUNTER_ATTACK1:
+                return State.HUNTER_ATTACK2;
+            case State.HUNTER_ATTACK2:
+                return State.HUNTER_ATTACK3;
+            case State.HUNTER_ATTACK3:
+                return State.HUNTER_ATTACK4;
+            case State.HUNTER_ATTACK4:
+                return State.HUNTER_ATTACK5;
+            case State.HUNTER_DREAM1:
+                return State.HUNTER_DREAM2;
+            case State.HUNTER_DREAM2:
+                return State.HUNTER_DREAM3;
+            case State.HUNTER_DREAM3:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM4;
+                    return State.HUNTER_DREAM_DISCARD;
+                }
+            case State.HUNTER_DREAM4:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM4;
+                    return State.HUNTER_DREAM_DISCARD;
+                }
+            case State.HUNTER_DREAM5:
+                return State.HUNTER_DREAM_DISCARD;
+            case State.HUNTER_DREAM_DISCARD1:
+                return State.HUNTER_DREAM_DISCARD2;
+            case State.HUNTER_DREAM_DISCARD2:
+                return State.HUNTER_DREAM_DISCARD3;
+            case State.HUNTER_DREAM_DISCARD3:
+                {
+                    if(OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM_DISCARD4;
+                    return State.ROUND_END;
+                }
+            case State.HUNTER_DREAM_DISCARD4:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM_DISCARD5;
+                    return State.ROUND_END;
+                }
+            case State.HUNTER_DREAM_DISCARD5:
+                return State.ROUND_END;
+            case State.ROUND_END:
+                return State.REVEAL_ENEMY;
             default:
                 return state;
         }

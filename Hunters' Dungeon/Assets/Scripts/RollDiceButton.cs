@@ -123,5 +123,6 @@ public class RollDiceButton : MonoBehaviour
         diceImage.sprite = initialSprite;
         diceImage.color = new Color32(255, 255, 255, 255);
         rollText.text = "Press the roll button.";
+        rollValue.text = string.Empty;
     }
 }

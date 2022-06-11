@@ -20,13 +20,18 @@ public class PlayerOffline
     public bool hasClickedOnCard = false;
     public bool isDead = false;
 
+    public bool hasAttacked = false;
+
     public Modifier modifier;
 
     public List<CardOffline> deck = new List<CardOffline>(7);
     public List<CardOffline> discardedCards = new List<CardOffline>(7);
+    public List<CardOffline> discardables;
     public CardOffline card;
 
     public List<Trophy> trophies = new List<Trophy>(3);
+
+    public int totalPoints = -1;
 
     public PlayerOffline() { }
 
@@ -40,6 +45,92 @@ public class PlayerOffline
 
         InitializeTrophies();
         InitializeInfo();
+    }
+
+    public int GetTotalPoints()
+    {
+        if(totalPoints < 0)
+        {
+            totalPoints += unbankedPoints;
+            totalPoints += bankedPoints;
+            totalPoints += trophies[0].levels[trophies[0].level];
+            totalPoints += trophies[1].levels[trophies[1].level];
+            totalPoints += trophies[2].levels[trophies[2].level];
+        }
+
+        return totalPoints;
+    }
+
+    public void FillDiscardables()
+    {
+        discardables = deck.FindAll(c => !c.isHunterDream);
+    }
+
+    public bool HasToDiscard()
+    {
+        return deck.Count > 7;
+    }
+
+    public void RemoveCard(int id)
+    {
+        for(int i=0;i<deck.Count;++i)
+            if(deck[i].id == id)
+            {
+                deck.RemoveAt(i);
+                return;
+            }
+    }
+
+    public void AddCard(CardOffline c)
+    {
+        deck.Add(new CardOffline(c));
+    }
+
+    public void HunterDream()
+    {
+        bankedPoints += unbankedPoints;
+        unbankedPoints = 0;
+        for (int i = 0; i < discardedCards.Count; ++i)
+        {
+            deck.Add(new CardOffline(discardedCards[i]));
+        }
+        discardedCards.Clear();
+        health = maxHealth;
+    }
+
+    public void ResetClicksAndCards()
+    {
+        chosenCard = prevChosenCard = -1;
+        hasClickedOnCard = false;
+    }
+
+    public void AddTrophy(List<TrophyType> tts)
+    {
+        foreach(TrophyType tt in tts)
+            foreach(Trophy trophy in trophies)
+                if(trophy.trophyType == tt)
+                {
+                    trophy.level++;
+                    if (trophy.level > trophy.maxLevel)
+                        trophy.level = trophy.maxLevel;
+                }
+    }
+
+    public void Revive()
+    {
+        isDead = false;
+        health = maxHealth;
+    }
+
+    public void ResetAttacked()
+    {
+        hasAttacked = false;
+    }
+
+    public void UpdateOrder(int max)
+    {
+        order++;
+        order %= max;
     }
 
     public bool TakeDamage(int value)

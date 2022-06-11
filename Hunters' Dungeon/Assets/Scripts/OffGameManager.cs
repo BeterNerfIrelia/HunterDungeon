@@ -9,6 +9,7 @@ public class OffGameManager : MonoBehaviour
 {
     public static List<PlayerOffline> staticPlayers = new List<PlayerOffline>();
     public List<PlayerOffline> players;
+    public List<PlayerOffline> order = new List<PlayerOffline>();
 
     public EventSystem eventSystem;
 
@@ -31,6 +32,7 @@ public class OffGameManager : MonoBehaviour
     public static Enemy enemy;
 
     [HideInInspector] public List<int> playerIDs;
+    public List<int> pidsBefore;
     int maxId = -1;
     int additionalHealth;
 
@@ -49,6 +51,14 @@ public class OffGameManager : MonoBehaviour
     public Canvas canvas;
     public static bool firstRound;
 
+    public static List<PlayerOffline> dreams = new List<PlayerOffline>();
+
+    public GameObject board;
+
+    public GameObject winner;
+    public TextMeshProUGUI winnerName;
+    public TextMeshProUGUI winnerPoints;
+
     private void Start()
     {
         firstRound = true;
@@ -64,6 +74,7 @@ public class OffGameManager : MonoBehaviour
 
 
         state = State.START;
+        winner.SetActive(false);
         currentEnemyEmpty.SetActive(false);
         finalBossEmpty.SetActive(false);
         playerCardsEmpty.SetActive(false);
@@ -78,14 +89,18 @@ public class OffGameManager : MonoBehaviour
 
         playerIDs.Clear();
         playerIDs = new List<int>();
+        int counter = 0;
         foreach (var p in players)
         {
             Debug.LogFormat("{0} is {1}", p.name, p.bot ? "Bot" : "Player");
             playerIDs.Add(p.id);
-
+            p.order = counter++;
             if (p.id > maxId)
                 maxId = p.id;
         }
+
+        pidsBefore = new List<int>(playerIDs);
+
         additionalHealth = players.Count - 3;
         for (int i = 1; i < players.Count; ++i)
             Instantiate(playerPrefab, otherPlayersEmpty.transform);
@@ -129,6 +144,9 @@ public class OffGameManager : MonoBehaviour
                         finalBossEmpty.SetActive(false);
                     }
 
+                    if (enemy.isFinalBoss)
+                        revealFinalBoss.gameObject.SetActive(false);
+
                     currentEnemyEmpty.SetActive(true);
                     currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
                     break;
@@ -147,11 +165,59 @@ public class OffGameManager : MonoBehaviour
                     playerCardsEmpty.SetActive(false);
                     revealCardsEmpty.SetActive(false);
                     rollDiceButton.gameObject.SetActive(true);
+                    continueButton.interactable = false;
                     break;
                 }
             case State.ENEMY_ATTACK:
                 {
                     continueButton.interactable = true;
+                    break;
+                }
+            case State.ENEMY_ESCAPES:
+                {
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).DisableCard();
+                    break;
+                }
+            case State.HUNTER_DREAM1:
+            case State.HUNTER_DREAM2:
+            case State.HUNTER_DREAM3:
+            case State.HUNTER_DREAM4:
+            case State.HUNTER_DREAM5:
+                {
+                    HandleChooseArmoury();
+                    break;
+                }
+            case State.HUNTER_DREAM_DISCARD1:
+            case State.HUNTER_DREAM_DISCARD2:
+            case State.HUNTER_DREAM_DISCARD3:
+            case State.HUNTER_DREAM_DISCARD4:
+            case State.HUNTER_DREAM_DISCARD5:
+                {
+                    HandleChooseDiscardCard();
+                    break;
+                }
+            case State.ROUND_END:
+                {
+                    showPlayerCards.interactable = true;
+                    revealArmouryButton.interactable = false;
+                    break;
+                }
+            case State.FINAL_SCORES:
+                {
+                    foreach (var p in players)
+                        p.GetTotalPoints();
+
+                    PlayerOffline win = players[0];
+                    for(int i=1;i<players.Count;++i)
+                        if(players[i].totalPoints > win.totalPoints)
+                        {
+                            win = players[i];
+                        }
+
+                    board.SetActive(false);
+                    winner.SetActive(true);
+                    winnerName.text = win.name;
+                    winnerPoints.text = win.totalPoints.ToString();
                     break;
                 }
             default: 
@@ -165,6 +231,12 @@ public class OffGameManager : MonoBehaviour
         {
             case State.REVEAL_ENEMY:
                 {
+                    foreach (var p in players)
+                    {
+                        p.ResetClicksAndCards();
+                        p.ResetAttacked();
+                    }
+
                     state = State.CHOOSE_CARD1;
                     revealFinalBoss.interactable = false;
                     revealArmouryButton.interactable = false;
@@ -214,14 +286,172 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ENEMY_ATTACK:
                 {
-                    foreach(PlayerOffline p in players)
+                    if (!firstRound)
+                        UpdateIdOrder();
+                    firstRound = false;
+                    foreach (PlayerOffline p in players)
                     {
                         p.TakeDamage(Dice.rollValue);
                     }
-                    state = State.HUNTER_ATTACK1;
+
+                    
+                    order = (players.FindAll(p => !p.isDead && !p.hasAttacked));
+                    if (order.Count > 0)
+                    {
+                        Sort(order);
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy, order[0]);
+                        state = State.HUNTER_ATTACK1;
+                    }
+                    else
+                    {
+                        state = State.ENEMY_ESCAPES;
+                    }
+                    break;
+                }
+            case State.HUNTER_ATTACK1:
+            case State.HUNTER_ATTACK2:
+            case State.HUNTER_ATTACK3:
+            case State.HUNTER_ATTACK4:
+            case State.HUNTER_ATTACK5:
+                {
+                    HandleAttackPlayer();
+                    break;
+                }
+            case State.ENEMY_ESCAPES:
+                {
+
+                    if(enemy.isDead)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.hasAttacked)
+                                p.AddTrophy(enemy.trophies);
+
+                        if (enemy.isFinalBoss)
+                        {
+                            state = State.FINAL_SCORES;
+                            break;
+                        }
+                        currentEnemyEmpty.SetActive(false);
+                        enemy = enemies.GetEnemy();
+                        state = State.HUNTER_DREAM;
+                        return;
+                    }
+
+                    if(enemy.isBoss)
+                    {
+                        state = State.HUNTER_DREAM;
+                        return;
+                    }
+
+                    // enemy escapes because it's neither a boss nor dead
+
+                    currentEnemyEmpty.SetActive(false);
+                    state = State.HUNTER_DREAM;
+                    once = false;
+                    break;
+                }
+            case State.HUNTER_DREAM:
+                {
+                    dreams.Clear();
+                    for (int i = 0; i < players.Count; ++i)
+                    {
+                        players[playerIDs[i] - 1].ResetClicksAndCards();
+                        if (players[playerIDs[i] - 1].card.isHunterDream)
+                        {
+                            players[playerIDs[i] - 1].HunterDream();
+                            dreams.Add(players[playerIDs[i] - 1]);
+                        }
+                        if (players[playerIDs[i] - 1].isDead)
+                            players[playerIDs[i] - 1].Revive();
+                    }
+
+                    if (dreams.Count > 0)
+                    {
+                        state = State.HUNTER_DREAM1;
+                        OnClickArmoury();
+                    }
+                    else
+                        state = State.ROUND_END;
+                    break;
+                }
+            case State.HUNTER_DREAM1:
+            case State.HUNTER_DREAM2:
+            case State.HUNTER_DREAM3:
+            case State.HUNTER_DREAM4:
+            case State.HUNTER_DREAM5:
+                {
+                    HandleChooseDream();
+                    break;
+                }
+            case State.HUNTER_DREAM_DISCARD:
+                {
+                    dreams.Clear();
+                    for(int i=0;i<players.Count;++i)
+                    {
+                        players[playerIDs[i] - 1].ResetClicksAndCards();
+                        players[playerIDs[i] - 1].FillDiscardables();
+                        if (players[playerIDs[i] - 1].HasToDiscard())
+                        {
+                            dreams.Add(players[playerIDs[i] - 1]);
+                        }
+                    }
+
+                    if (dreams.Count > 0)
+                    {
+                        state = State.HUNTER_DREAM_DISCARD1;
+                        mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleDiscardCards(dreams[0]);
+                    }
+                    else
+                        state = State.ROUND_END;
+                    break;
+                }
+            case State.HUNTER_DREAM_DISCARD1:
+            case State.HUNTER_DREAM_DISCARD2:
+            case State.HUNTER_DREAM_DISCARD3:
+            case State.HUNTER_DREAM_DISCARD4:
+            case State.HUNTER_DREAM_DISCARD5:
+                {
+                    HandleChooseDiscard();
+                    break;
+                }
+            case State.ROUND_END:
+                {
+                    cards.RefillTopDeck();
+                    revealArmouryButton.interactable = true;
+                    UpdateIdOrder();
+                    UpdatePlayerOrder();
+                    state = State.REVEAL_ENEMY;
+
+                    currentEnemyEmpty.GetComponentInChildren<RollDiceButton>(true).ResetDice();
                     break;
                 }
         }
+    }
+
+    public void HandleAttackPlayer()
+    {
+        EnemyPrefab ep = currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true);
+        if (enemy.TakeDamage(order[0]))
+        {
+            state = State.ENEMY_ESCAPES;
+            ep.DisableCard();
+            return;
+        }
+
+        order.RemoveAt(0);
+        if (order.Count > 0)
+        {
+            state = StateHandler.ChangeState(state);
+            ep.UpdateEnemy(enemy, order[0]);
+        }
+        else
+            state = State.ENEMY_ESCAPES;
+    }
+
+    public void UpdatePlayerOrder()
+    {
+        foreach (var p in players)
+            p.UpdateOrder(players.Count);
     }
 
     public void HandleShowCardsButton()
@@ -247,6 +477,66 @@ public class OffGameManager : MonoBehaviour
         }
     }
 
+    public void HandleChooseDiscard()
+    {
+        if (!dreams[0].hasClickedOnCard)
+            return;
+
+        // dreams[0].AddCard(cards.GetFromTopDeck(dreams[0].chosenCard));
+        dreams[0].RemoveCard(dreams[0].discardables[dreams[0].chosenCard].id);
+        RescaleCards();
+
+        dreams.RemoveAt(0);
+        if (dreams.Count > 0)
+        {
+            bool condition = false;
+            do
+            {
+                UpdateIdOrder();
+                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                    condition = true;
+            } while (!condition);
+        }
+        else
+            HandleLastPlayerDiscard();
+
+        state = StateHandler.ChangeState(state);
+    }
+
+    public void HandleLastPlayerDiscard()
+    {
+        playerCardsEmpty.SetActive(false);
+        UpdateIdOrder();
+    }
+
+    public void HandleChooseDream()
+    {
+        if (!dreams[0].hasClickedOnCard)
+            return;
+
+        dreams[0].AddCard(cards.GetFromTopDeck(dreams[0].chosenCard));
+        RescaleArmoury();
+
+        dreams.RemoveAt(0);
+        Debug.Log("DreamChoosing Card dreams.Count = " + dreams.Count);
+        if (dreams.Count > 0)
+        {
+            bool condition = false;
+            do
+            {
+                UpdateIdOrder();
+                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                    condition = true;
+            } while (!condition);
+        }
+        else
+            HandleLastPlayerArmoury();
+
+        UpdateArmouryCards();
+        state = StateHandler.ChangeState(state);
+        Debug.Log("Dream Choosing next state = " + state);
+    }
+
     public void HandleChooseCommon()
     {
         if (!players[playerIDs[0] - 1].hasClickedOnCard)
@@ -255,8 +545,49 @@ public class OffGameManager : MonoBehaviour
         players[playerIDs[0] - 1].ChooseCard();
         RescaleCards();
         UpdateIdOrder();
+        mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleShowCards(players[playerIDs[0] - 1]);
         state = StateHandler.ChangeState(state);
         once = false;
+    }
+
+    public void UpdateArmouryCards()
+    {
+        for (int i = 0; i < armouryEmpty.transform.childCount; ++i)
+            armouryEmpty.transform.GetChild(i).gameObject.SetActive(false);
+        GameObject tmp;
+        for(int i=0;i<cards.topDeck.Count;++i)
+        {
+            tmp = armouryEmpty.transform.GetChild(i).gameObject;
+            tmp.SetActive(true);
+            tmp.GetComponentInChildren<CardPrefab>(true).UpdateCard(cards.topDeck[i]);
+        }
+    }
+
+    public static void Sort(List<PlayerOffline> ps)
+    {
+        for(int i=0;i<ps.Count -1;++i)
+            for(int j=i+1;j<ps.Count;++j)
+                if(ps[i].order > ps[j].order)
+                {
+                    var p = ps[i];
+                    ps[i] = ps[j];
+                    ps[j] = p;
+                }
+    }
+
+    public void HandlePlayerOrder()
+    {
+        foreach(PlayerOffline p in players)
+        {
+            p.UpdateOrder(players.Count);
+        }
+    }
+
+    public void HandleLastPlayerArmoury()
+    {
+        armouryEmpty.SetActive(false);
+        once = false;
+        UpdateIdOrder();
     }
 
     public void HandleLastPlayerChoose()
@@ -281,6 +612,115 @@ public class OffGameManager : MonoBehaviour
         {
             revealCardsEmpty.transform.GetChild(i).gameObject.SetActive(true);
             revealCardsEmpty.transform.GetChild(i).gameObject.GetComponentInChildren<CardPrefab>().UpdateCard(players[playerIDs[i] - 1]);
+        }
+    }
+
+    public void HandleChooseDiscardCard()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            ped = new PointerEventData(eventSystem) { position = Input.mousePosition };
+
+            rayResults = new List<RaycastResult>();
+            raycaster.Raycast(ped, rayResults);
+
+            foreach (RaycastResult res in rayResults)
+            {
+                if (res.gameObject.transform.parent != null)
+                {
+                    if (res.gameObject.name.Contains("Transform"))
+                        break;
+                    if (res.gameObject.name.Contains("CardBackground"))
+                    {
+
+                        string objName;
+                        CardPrefab scaleComparer = res.gameObject.transform.parent.gameObject.GetComponentInChildren<CardPrefab>(true);
+                        if (!dreams[0].hasClickedOnCard)
+                        {
+                            dreams[0].hasClickedOnCard = true;
+                            scaleComparer.CardSelectionAnimation();
+                            objName = res.gameObject.transform.parent.name;
+                            dreams[0].chosenCard = objName[objName.Length - 1] - '1';
+                            break;
+                        }
+
+                        dreams[0].prevChosenCard = dreams[0].chosenCard;
+                        objName = res.gameObject.transform.parent.name;
+                        dreams[0].chosenCard = objName[objName.Length - 1] - '1';
+
+                        Vector3 cardScale = res.gameObject.transform.localScale;
+                        if (dreams[0].prevChosenCard == dreams[0].chosenCard)
+                            break;
+                        if (cardScale == scaleComparer.originalScale)
+                        {
+                            scaleComparer.CardSelectionAnimation();
+                            scaleComparer = playerCardsEmpty
+                                .transform
+                                .GetChild(dreams[0].prevChosenCard)
+                                .gameObject
+                                .GetComponentInChildren<CardPrefab>(true);
+                            scaleComparer.CardDeselectionAnimation();
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    public void HandleChooseArmoury()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            ped = new PointerEventData(eventSystem) { position = Input.mousePosition };
+
+            rayResults = new List<RaycastResult>();
+            raycaster.Raycast(ped, rayResults);
+
+            foreach (RaycastResult res in rayResults)
+            {
+                if (res.gameObject.transform.parent != null)
+                {
+                    if (res.gameObject.name.Contains("Transform"))
+                        break;
+                    if (res.gameObject.name.Contains("CardBackground"))
+                    {
+                        
+                        string objName;
+                        CardPrefab scaleComparer = res.gameObject.transform.parent.gameObject.GetComponentInChildren<CardPrefab>(true);
+                        if (!dreams[0].hasClickedOnCard)
+                        {
+                            dreams[0].hasClickedOnCard = true;
+                            scaleComparer.CardSelectionAnimation();
+                            objName = res.gameObject.transform.parent.name;
+                            dreams[0].chosenCard = objName[objName.Length - 1] - '1';
+                            break;
+                        }
+
+                        dreams[0].prevChosenCard = dreams[0].chosenCard;
+                        objName = res.gameObject.transform.parent.name;
+                        dreams[0].chosenCard = objName[objName.Length - 1] - '1';
+
+                        Vector3 cardScale = res.gameObject.transform.localScale;
+                        if (dreams[0].prevChosenCard == dreams[0].chosenCard)
+                            break;
+                        if (cardScale == scaleComparer.originalScale)
+                        {
+                            scaleComparer.CardSelectionAnimation();
+                            scaleComparer = armouryEmpty
+                                .transform
+                                .GetChild(dreams[0].prevChosenCard)
+                                .gameObject
+                                .GetComponentInChildren<CardPrefab>(true);
+                            scaleComparer.CardDeselectionAnimation();
+                        }
+
+                    }
+                }
+
+            }
         }
     }
 
@@ -344,6 +784,12 @@ public class OffGameManager : MonoBehaviour
             playerCardsEmpty.transform.GetChild(i).localScale = new Vector3(1, 1, 1);
     }
 
+    public void RescaleArmoury()
+    {
+        for (int i = 0; i < armouryEmpty.transform.childCount; ++i)
+            armouryEmpty.transform.GetChild(i).localScale = new Vector3(1, 1, 1);
+    }
+
     public void SetupEnemies()
     {
         enemies.ReadEnemies();
@@ -377,6 +823,9 @@ public class OffGameManager : MonoBehaviour
 
     public void UpdateIdOrder()
     {
+        Debug.Log("IDs before update");
+        foreach (var i in playerIDs)
+            Debug.Log(i);
         if (playerIDs[0] >= maxId)
             ShiftPlayers();
         else
@@ -385,12 +834,18 @@ public class OffGameManager : MonoBehaviour
             playerIDs[0] = playerIDs[id];
             playerIDs[id] = id;
         }
+        Debug.Log("IDs after update");
+        foreach (var i in playerIDs)
+            Debug.Log(i);
     }
 
     public void HandleShowCards()
     {
         if (playerCardsEmpty.activeInHierarchy)
-            playerCardsEmpty.SetActive(false);
+        {
+            if(!StateHandler.IsChoosingState(state))
+                playerCardsEmpty.SetActive(false);
+        }
         else
         {
             playerCardsEmpty.SetActive(true);
@@ -398,9 +853,9 @@ public class OffGameManager : MonoBehaviour
                 playerCardsEmpty.transform.GetChild(i).gameObject.SetActive(false);
             PlayerOffline p = players[playerIDs[0] - 1];
             GameObject tmp;
-            for (int i=0;i<p.deck.Count;++i)
+            for (int i = 0; i < p.deck.Count; ++i)
             {
-                tmp= playerCardsEmpty.transform.GetChild(i).gameObject;
+                tmp = playerCardsEmpty.transform.GetChild(i).gameObject;
                 tmp.SetActive(true);
                 tmp.GetComponentInChildren<CardPrefab>(true).UpdateCard(p.deck[i], p.name);
             }

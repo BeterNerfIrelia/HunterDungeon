@@ -48,13 +48,56 @@ public class PlayerPrefab : MonoBehaviour
 
     }
 
+    public void HandleDreamCards(PlayerOffline player)
+    {
+        if (cardSpace.activeInHierarchy)
+        {
+            cardSpace.SetActive(false);
+            return;
+        }
+        List<CardOffline> deck = player.deck.FindAll(c => !c.isHunterDream);
+        cardSpace.SetActive(true);
+        HandleDreamObjects(deck, player);
+    }
+
+    public void HandleDreamObjects(List<CardOffline> deck, PlayerOffline player)
+    {
+        for (int i = 0; i < objectCards.Count; ++i)
+            objectCards[i].SetActive(false);
+        for (int i = 0; i < deck.Count; ++i)
+        {
+            objectCards[i].SetActive(true);
+            objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(deck[i], player.name);
+        }
+    }
+
+    public void HandleDiscardCards(PlayerOffline player)
+    {
+        List<CardOffline> discardable = player.discardables;
+        if (cardSpace.activeInHierarchy)
+        {
+            if (!StateHandler.IsChoosingState(OffGameManager.state))
+                cardSpace.SetActive(false);
+            else
+                HandleObjectCards(player, discardable);
+        }
+        else
+        {
+            cardSpace.SetActive(true);
+            HandleObjectCards(player, discardable);
+        }
+    }
+
     public void HandleShowCards(PlayerOffline player)
     {
         if (playerCards.Count != player.deck.Count)
             GetPlayerCards(player);
         if (cardSpace.activeInHierarchy)
         {
-            cardSpace.SetActive(false);
+            if (!StateHandler.IsChoosingState(OffGameManager.state))
+                cardSpace.SetActive(false);
+            else
+                HandleObjectCards(player);
         }
         else
         {
@@ -85,6 +128,17 @@ public class PlayerPrefab : MonoBehaviour
         {
             objectCards[i].SetActive(true);
             objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(player.deck[i], player.name);
+        }
+    }
+
+    void HandleObjectCards(PlayerOffline player, List<CardOffline> deck)
+    {
+        for (int i = 0; i < objectCards.Count; ++i)
+            objectCards[i].SetActive(false);
+        for (int i = 0; i < deck.Count; ++i)
+        {
+            objectCards[i].SetActive(true);
+            objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(deck[i], player.name);
         }
     }
 }

@@ -13,8 +13,8 @@ public class Enemies
 
     public int enemyIndex;
     public int deckSize;
-    public int normals = 4;
-    public int bosses = 2;
+    public int normals = 1;
+    public int bosses = 0;
 
     public Dictionary<int, bool> apps;
 
@@ -41,12 +41,21 @@ public class Enemies
         finalBoss = new Enemy(fBosses[v]);
     }
 
+    public Enemy GetEnemy()
+    {
+        if (deck.Count == 0)
+            return finalBoss;
+        return deck[enemyIndex];
+    }
+
     public void RemoveEnemy()
     {
-        deck.RemoveAt(enemyIndex);
-        deckSize = deck.Count;
-
-        enemyIndex = GetRandomEnemy();
+        if (deck.Count > 0)
+        {
+            deck.RemoveAt(enemyIndex);
+            deckSize = deck.Count;
+            enemyIndex = GetRandomEnemy();
+        }
     }
 
     public int GetRandomEnemy()
