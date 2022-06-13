@@ -24,9 +24,18 @@ public class CardPrefab : MonoBehaviour
         cardImage.sprite = null;
         damageValue.text = player.card.damage.ToString();
         if (int.Parse(damageValue.text) < 1)
+        {
             damageValue.transform.parent.gameObject.SetActive(false);
+            if (player.card.effect.countType != CountType.NONE)
+            {
+                damageValue.transform.parent.gameObject.SetActive(true);
+                damageValue.text = player.CountCards(GetCountType(player.card.id)).ToString();
+            }
+        }
         else
             damageValue.transform.parent.gameObject.SetActive(true);
+
+
         description.text = player.card.description;
         cardType.text = CardTypeToString.CardToString(player.card.cardType);
         cardOwner.text = player.name;
@@ -46,9 +55,23 @@ public class CardPrefab : MonoBehaviour
         cardImage.sprite = null;
         damageValue.text = card.damage.ToString();
         if (int.Parse(damageValue.text) < 1)
+        {
             damageValue.transform.parent.gameObject.SetActive(false);
+            if (card.effect.countType != CountType.NONE)
+            {
+                damageValue.transform.parent.gameObject.SetActive(true);
+                damageValue.text = "X";
+            }
+        }
         else
             damageValue.transform.parent.gameObject.SetActive(true);
+
+        if(card.effect.countType != CountType.NONE)
+        {
+            damageValue.transform.parent.gameObject.SetActive(true);
+            damageValue.text = "X";
+        }
+
         description.text = card.description;
         cardType.text = CardTypeToString.CardToString(card.cardType);
         cardOwner.text = playerName;
@@ -66,7 +89,15 @@ public class CardPrefab : MonoBehaviour
         cardImage.sprite = null;
         damageValue.text = card.damage.ToString();
         if (int.Parse(damageValue.text) < 1)
+        {
             damageValue.transform.parent.gameObject.SetActive(false);
+            Debug.Log("Card's effect = " + (card.effect == null ? "null" : "not null"));
+            if (card.effect.countType != CountType.NONE)
+            {
+                damageValue.transform.parent.gameObject.SetActive(true);
+                damageValue.text = player.CountCards(GetCountType(card.id)).ToString();
+            }
+        }
         else
             damageValue.transform.parent.gameObject.SetActive(true);
         description.text = card.description;
@@ -92,7 +123,14 @@ public class CardPrefab : MonoBehaviour
         damageValue.text = card.damage.ToString();
 
         if (int.Parse(damageValue.text) < 1)
+        {
             damageValue.transform.parent.gameObject.SetActive(false);
+            if (card.effect.countType != CountType.NONE)
+            {
+                damageValue.transform.parent.gameObject.SetActive(true);
+                damageValue.text = "X";
+            }
+        }
         else
             damageValue.transform.parent.gameObject.SetActive(true);
         description.text = card.description;
@@ -117,4 +155,14 @@ public class CardPrefab : MonoBehaviour
         clickedOn = false;
     }
 
+    CountType GetCountType(int id)
+    {
+        return id switch
+        {
+            302 => CountType.POINTS,
+            303 => CountType.MELEE,
+            304 => CountType.RANGED,
+            _ => CountType.NONE
+        };
+    }
 }

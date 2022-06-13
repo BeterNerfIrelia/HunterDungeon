@@ -178,6 +178,11 @@ public class PlayerOffline
         card = new CardOffline(deck[chosenCard]);
 
         deck.RemoveAt(chosenCard);
+
+        if(card.effect.countType != CountType.NONE)
+        {
+            card.damage = CountCards(card.effect.countType);
+        }
         discardedCards.Add(new CardOffline(card));
     }
 
@@ -199,6 +204,31 @@ public class PlayerOffline
     {
         if (card.isTransform)
             transforms--;
+    }
+
+    public void ResetCounts()
+    {
+        foreach (CardOffline c in deck)
+            if (c.effect.countType != CountType.NONE)
+                c.damage = 0;
+        foreach(CardOffline c in discardedCards)
+            if (c.effect.countType != CountType.NONE)
+                c.damage = 0;
+    }
+
+    public int CountCards(CountType ct)
+    {
+        switch(ct)
+        {
+            case CountType.MELEE:
+                return discardedCards.FindAll(c => c.effect.countType == CountType.MELEE).Count;
+            case CountType.RANGED:
+                return discardedCards.FindAll(c => c.effect.countType == CountType.RANGED).Count;
+            case CountType.POINTS:
+                return unbankedPoints;
+            default:
+                return 0;
+        }
     }
 
 }

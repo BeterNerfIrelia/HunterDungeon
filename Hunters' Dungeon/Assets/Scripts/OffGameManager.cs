@@ -440,7 +440,12 @@ public class OffGameManager : MonoBehaviour
                     currentEnemyEmpty.GetComponentInChildren<RollDiceButton>(true).ResetDice();
 
                     foreach (PlayerOffline p in players)
+                    {
                         p.ResetTransformCards();
+                        p.ResetCounts();
+                        p.ResetClicksAndCards();
+                        p.ResetAttacked();
+                    }
 
                     break;
                 }

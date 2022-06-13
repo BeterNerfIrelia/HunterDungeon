@@ -5,9 +5,10 @@ ID;CardType;Name;Description;ImageName;damage;HasEffect;EffectType;CountType;Hun
 104;1;Transformed Bloodletter;Additional Effect: Suffer 1 damage and deal 2 damage to everything.;*;3;1;1;0;0;1;0
 105;1;Transformed Boom Hammer;Additional Effect: Deal 1 damage to everyone.;*;5;1;1;0;0;1;0
 106;1;Transformed Tonitrus;Additional Effect: Gain 1 damage for each ranged weapon in your used pile.;*;3;1;1;0;0;1;0
-107;1;Transformed Blades of Mercy;Additional Effect: If you have 3 or less health, you're immune to damage.;*;2;1;1;1;0;1;1
+107;1;Transformed Blades of Mercy;Additional Effect: If you have 3 or less health, you're immune to damage.;*;2;1;1;0;0;1;1
 108;1;Transformed Cosmic Parasite;No Additional Effect;*;4;1;1;0;0;1;0
 109;1;Transformed Threaded Cane;Additional Effect: You deal 1 damage to the other hunters.;*;2;1;1;0;0;1;0
+110;1;Transformed Whirligig Saw;Additional Effect: Heal for the amount of damage dealt.;*;3;1;2;0;0;1;0
 201;2;Transformed Hunter's Pistol;Additional Effect: Heal for half the damage the enemy dealt to you.;*;1;2;1;0;0;1;0
 202;2;Transformed Evelyn;The bonus is changed to +3;*;2;1;1;0;0;1;0
 203;2;Transformed Stone Fist;You're immune to damage this round.;*;3;2;1;0;0;1;0

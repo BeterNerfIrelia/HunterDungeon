@@ -6,7 +6,7 @@ public class Cards
 {
     Modifier modifier;
 
-    List<int> startingCardsIds = new List<int>() { 101, 102, 201, 208, 401 };
+    List<int> startingCardsIds = new List<int>() { 101, 102, 201, 401,  302, 303, 304}; //208 = blunderbass
     public List<CardOffline> cards = new List<CardOffline>();
     public List<CardOffline> deck = new List<CardOffline>();
     public List<CardOffline> topDeck = new List<CardOffline>();
