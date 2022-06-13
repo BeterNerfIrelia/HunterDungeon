@@ -9,6 +9,8 @@ public class Effect
     public bool hasEffect;
     public bool hasBeenApplied = false;
 
+    public Effect() { }
+
     public Effect(bool he, EffectType et, CountType ct)
     {
         effectType = et;

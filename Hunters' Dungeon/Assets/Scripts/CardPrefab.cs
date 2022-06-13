@@ -36,6 +36,8 @@ public class CardPrefab : MonoBehaviour
             transformButton.gameObject.SetActive(false);
         else
             transformButton.gameObject.SetActive(true);
+        if (player.transforms == 0)
+            transformButton.gameObject.SetActive(false);
     }
 
     public void UpdateCard(CardOffline card, string playerName)
@@ -56,6 +58,31 @@ public class CardPrefab : MonoBehaviour
             transformButton.gameObject.SetActive(false);
         else
             transformButton.gameObject.SetActive(true);
+    }
+
+    public void UpdateCard(CardOffline card, PlayerOffline player)
+    {
+        cardName.text = card.name;
+        cardImage.sprite = null;
+        damageValue.text = card.damage.ToString();
+        if (int.Parse(damageValue.text) < 1)
+            damageValue.transform.parent.gameObject.SetActive(false);
+        else
+            damageValue.transform.parent.gameObject.SetActive(true);
+        description.text = card.description;
+        cardType.text = CardTypeToString.CardToString(card.cardType);
+        cardOwner.text = player.name;
+        cardOwner.gameObject.SetActive(true);
+
+        if (card.cardType == CardType.ITEM || card.cardType == CardType.OTHER)
+            transformButton.gameObject.SetActive(false);
+        else
+            transformButton.gameObject.SetActive(true);
+
+        if(player.transforms == 0)
+        {
+            transformButton.gameObject.SetActive(false);
+        }
     }
 
     public void UpdateCard(CardOffline card)
@@ -89,4 +116,5 @@ public class CardPrefab : MonoBehaviour
         cardAnimation.Play("Card_Deselected");
         clickedOn = false;
     }
+
 }

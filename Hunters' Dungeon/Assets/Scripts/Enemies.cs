@@ -13,8 +13,8 @@ public class Enemies
 
     public int enemyIndex;
     public int deckSize;
-    public int normals = 1;
-    public int bosses = 0;
+    public int normals = 2;
+    public int bosses = 2;
 
     public Dictionary<int, bool> apps;
 

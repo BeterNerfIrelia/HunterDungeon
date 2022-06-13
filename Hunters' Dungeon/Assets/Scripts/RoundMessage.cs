@@ -82,9 +82,11 @@ public class RoundMessage : MonoBehaviour
                     if (OffGameManager.enemy.isDead)
                         text.text = enemyDies;
                     else
+                    {
                         text.text = enemyEscapes;
-                    if (OffGameManager.enemy.isBoss)
-                        text.text = bossRemains;
+                        if (OffGameManager.enemy.isBoss)
+                            text.text = bossRemains;
+                    }
                     break;
                 }
             case State.HUNTER_DREAM:

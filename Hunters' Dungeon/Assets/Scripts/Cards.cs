@@ -6,7 +6,7 @@ public class Cards
 {
     Modifier modifier;
 
-    List<int> startingCardsIds = new List<int>() { 101, 102, 201, 401, 103, 104, 105 };
+    List<int> startingCardsIds = new List<int>() { 101, 102, 201, 208, 401 };
     public List<CardOffline> cards = new List<CardOffline>();
     public List<CardOffline> deck = new List<CardOffline>();
     public List<CardOffline> topDeck = new List<CardOffline>();
@@ -20,8 +20,12 @@ public class Cards
     public List<CardOffline> GetStartingHand()
     {
         List<CardOffline> ret = new List<CardOffline>();
+        CardOffline c;
         foreach (var i in startingCardsIds)
-            ret.Add(new CardOffline(cards[GetCardPosById(i)]));
+        {
+            c = cards[GetCardPosById(i)];
+            ret.Add(new CardOffline(c));
+        }
 
         return ret;
     }
@@ -68,12 +72,25 @@ public class Cards
         int iterations = (cards.Count - 5) * maxAppearences;
         int index;
         List<CardOffline> available;
+        CardOffline c;
         while(iterations > 0)
         {
             available = cards.FindAll(c => cardApps[c.id] < maxAppearences && !IsStartingCard(c.id));
             index = Random.Range(0, available.Count);
             cardApps[available[index].id] = cardApps[available[index].id]++;
+            c = available[index];
             deck.Add(new CardOffline(available[index]));
+            /*
+            for(int i=0;i<deck.Count;++i)
+            {
+                if(deck[i].id == c.id)
+                {
+                    if(c.cardType == CardType.WEAPON_MELEE || c.cardType == CardType.WEAPON_RANGED)
+                        deck[i].AddTransformCard(c.tData);
+                    break;
+                }
+            }
+            */
             iterations--;
         }
     }
@@ -91,6 +108,65 @@ public class Cards
             default:
                 return false;
         }
+    }
+
+    public void ReadTransforms()
+    {
+        StreamReader file = new StreamReader("Assets\\Resources\\Data\\transforms.txt");
+        string line;
+        string[] components;
+
+        file.ReadLine();
+
+        line = file.ReadLine();
+        TransformData transf;
+        Effect effect;
+        while (line != null)
+        {
+            components = line.Split(';');
+            effect = new Effect(
+                int.Parse(components[6]) > 0,
+                GetEffectType(int.Parse(components[7])),
+                GetCountType(int.Parse(components[8]))
+                );
+            /*
+            transf = new CardOffline(
+                int.Parse(components[0]),
+                GetCardType(int.Parse(components[1])),
+                components[2],
+                components[3].Contains("*") ? string.Empty : components[3],
+                components[4].Contains("*") ? string.Empty : components[4],
+                int.Parse(components[5]),
+                effect,
+                int.Parse(components[9]) > 0,
+                int.Parse(components[10]) > 0,
+                int.Parse(components[11]) > 0
+                );
+            */
+
+            transf = new TransformData(
+                int.Parse(components[0]),
+                components[2],
+                components[3].Contains("*") ? string.Empty : components[3],
+                components[4].Contains("*") ? string.Empty : components[4],
+                int.Parse(components[5]),
+                effect,
+                int.Parse(components[10]) > 0,
+                int.Parse(components[11]) > 0
+                );
+
+            for (int i = 0; i < cards.Count; ++i)
+                if (cards[i].id == transf.id)
+                {
+                    cards[i].AddTransformCard(transf);
+                    break;
+                }
+           
+            
+            line = file.ReadLine();
+        }
+        file.Close();
+
     }
 
     public int ReadCards()
@@ -126,13 +202,13 @@ public class Cards
                 int.Parse(components[10]) > 0,
                 int.Parse(components[11]) > 0
                 );
-
             cardApps.Add(card.id, 0);
 
             cards.Add(new CardOffline(card));
             line = file.ReadLine();
         }
         file.Close();
+
         if (!read)
             return 1;
         

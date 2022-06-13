@@ -55,9 +55,8 @@ public class OffGameManager : MonoBehaviour
 
     public GameObject board;
 
-    public GameObject winner;
-    public TextMeshProUGUI winnerName;
-    public TextMeshProUGUI winnerPoints;
+    public GameObject winnerEmpty;
+    public GameObject winnerPrefab;
 
     private void Start()
     {
@@ -65,7 +64,7 @@ public class OffGameManager : MonoBehaviour
         once = false;
         enemyChosen = false;
         players = new List<PlayerOffline>(staticPlayers);
-        staticPlayers.Clear();
+        
         cards = new Cards();
         enemies = new Enemies();
         maxId = -1;
@@ -74,7 +73,7 @@ public class OffGameManager : MonoBehaviour
 
 
         state = State.START;
-        winner.SetActive(false);
+        winnerEmpty.SetActive(false);
         currentEnemyEmpty.SetActive(false);
         finalBossEmpty.SetActive(false);
         playerCardsEmpty.SetActive(false);
@@ -193,6 +192,7 @@ public class OffGameManager : MonoBehaviour
             case State.HUNTER_DREAM_DISCARD4:
             case State.HUNTER_DREAM_DISCARD5:
                 {
+                    
                     HandleChooseDiscardCard();
                     break;
                 }
@@ -204,20 +204,12 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.FINAL_SCORES:
                 {
-                    foreach (var p in players)
-                        p.GetTotalPoints();
-
-                    PlayerOffline win = players[0];
-                    for(int i=1;i<players.Count;++i)
-                        if(players[i].totalPoints > win.totalPoints)
-                        {
-                            win = players[i];
-                        }
-
-                    board.SetActive(false);
-                    winner.SetActive(true);
-                    winnerName.text = win.name;
-                    winnerPoints.text = win.totalPoints.ToString();
+                    if (!once)
+                    {
+                        once = true;
+                        HandleWinners();
+                    }
+                    
                     break;
                 }
             default: 
@@ -227,6 +219,7 @@ public class OffGameManager : MonoBehaviour
 
     public void HandleContinueButton()
     {
+        Debug.Log("State = " + state);
         switch(state)
         {
             case State.REVEAL_ENEMY:
@@ -286,8 +279,6 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ENEMY_ATTACK:
                 {
-                    if (!firstRound)
-                        UpdateIdOrder();
                     firstRound = false;
                     foreach (PlayerOffline p in players)
                     {
@@ -319,7 +310,6 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ENEMY_ESCAPES:
                 {
-
                     if(enemy.isDead)
                     {
                         foreach (PlayerOffline p in players)
@@ -329,8 +319,12 @@ public class OffGameManager : MonoBehaviour
                         if (enemy.isFinalBoss)
                         {
                             state = State.FINAL_SCORES;
+                            once = false;
+                            winnerEmpty.SetActive(true);
+                            board.SetActive(false);
                             break;
                         }
+                        //currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
                         currentEnemyEmpty.SetActive(false);
                         enemy = enemies.GetEnemy();
                         state = State.HUNTER_DREAM;
@@ -369,6 +363,17 @@ public class OffGameManager : MonoBehaviour
                     {
                         state = State.HUNTER_DREAM1;
                         OnClickArmoury();
+                        if (dreams[0].id != playerIDs[0])
+                        {
+                            bool condition = false;
+                            do
+                            {
+                                UpdateIdOrder();
+                                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                                    condition = true;
+                            } while (!condition);
+                        }
+
                     }
                     else
                         state = State.ROUND_END;
@@ -399,6 +404,16 @@ public class OffGameManager : MonoBehaviour
                     if (dreams.Count > 0)
                     {
                         state = State.HUNTER_DREAM_DISCARD1;
+                        if (dreams[0].id != playerIDs[0])
+                        {
+                            bool condition = false;
+                            do
+                            {
+                                UpdateIdOrder();
+                                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                                    condition = true;
+                            } while (!condition);
+                        }
                         mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleDiscardCards(dreams[0]);
                     }
                     else
@@ -421,11 +436,16 @@ public class OffGameManager : MonoBehaviour
                     UpdateIdOrder();
                     UpdatePlayerOrder();
                     state = State.REVEAL_ENEMY;
-
+                    pidsBefore = new List<int>(playerIDs);
                     currentEnemyEmpty.GetComponentInChildren<RollDiceButton>(true).ResetDice();
+
+                    foreach (PlayerOffline p in players)
+                        p.ResetTransformCards();
+
                     break;
                 }
         }
+        Debug.Log("After State = " + state);
     }
 
     public void HandleAttackPlayer()
@@ -434,6 +454,7 @@ public class OffGameManager : MonoBehaviour
         if (enemy.TakeDamage(order[0]))
         {
             state = State.ENEMY_ESCAPES;
+            ep.UpdateEnemy(enemy, order[0]);
             ep.DisableCard();
             return;
         }
@@ -443,9 +464,11 @@ public class OffGameManager : MonoBehaviour
         {
             state = StateHandler.ChangeState(state);
             ep.UpdateEnemy(enemy, order[0]);
+
         }
         else
             state = State.ENEMY_ESCAPES;
+        
     }
 
     public void UpdatePlayerOrder()
@@ -485,6 +508,9 @@ public class OffGameManager : MonoBehaviour
         // dreams[0].AddCard(cards.GetFromTopDeck(dreams[0].chosenCard));
         dreams[0].RemoveCard(dreams[0].discardables[dreams[0].chosenCard].id);
         RescaleCards();
+        
+        if(dreams.Count >= 2)
+            mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleDiscardCards(dreams[1]);
 
         dreams.RemoveAt(0);
         if (dreams.Count > 0)
@@ -506,7 +532,13 @@ public class OffGameManager : MonoBehaviour
     public void HandleLastPlayerDiscard()
     {
         playerCardsEmpty.SetActive(false);
-        UpdateIdOrder();
+        bool condition = false;
+        do
+        {
+            UpdateIdOrder();
+            if (playerIDs[0] == pidsBefore[0])
+                condition = true;
+        } while (!condition);
     }
 
     public void HandleChooseDream()
@@ -587,7 +619,13 @@ public class OffGameManager : MonoBehaviour
     {
         armouryEmpty.SetActive(false);
         once = false;
-        UpdateIdOrder();
+        bool condition = false;
+        do
+        {
+            UpdateIdOrder();
+            if (playerIDs[0] == pidsBefore[0])
+                condition = true;
+        } while (!condition);
     }
 
     public void HandleLastPlayerChoose()
@@ -601,6 +639,9 @@ public class OffGameManager : MonoBehaviour
         revealCardsButton.gameObject.SetActive(false);
         once = false;
         currentEnemyEmpty.SetActive(false);
+
+        foreach (PlayerOffline p in players)
+            p.HandleTransformCount();
 
     }
 
@@ -629,7 +670,20 @@ public class OffGameManager : MonoBehaviour
                 if (res.gameObject.transform.parent != null)
                 {
                     if (res.gameObject.name.Contains("Transform"))
+                    {
+                        /*
+                        var cardName = res.gameObject.transform.parent.GetChild(0).gameObject.GetComponentInChildren<TextMeshProUGUI>(true).text;
+                        Debug.Log("Cartea mea este " + cardName);
+                        foreach (var c in dreams[0].discardables)
+                            if (c.name.Equals(cardName))
+                            {
+                                c.TransformCard();
+                                mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleDiscardCards(dreams[0]);
+                                break;
+                            }
+                        */
                         break;
+                    }
                     if (res.gameObject.name.Contains("CardBackground"))
                     {
 
@@ -683,8 +737,23 @@ public class OffGameManager : MonoBehaviour
             {
                 if (res.gameObject.transform.parent != null)
                 {
+                    Debug.Log("Am lovit " + res.gameObject.name);
                     if (res.gameObject.name.Contains("Transform"))
+                    {
+                        var cardName = res.gameObject.transform.parent.GetChild(0).gameObject.GetComponentInChildren<TextMeshProUGUI>(true).text;
+                        Debug.Log("Cartea mea este " + cardName);
+                        foreach (var c in cards.topDeck)
+                            if (c.name.Equals(cardName))
+                            {
+                                if (c.IsWeapon())
+                                {
+                                    c.TransformCard();
+                                }
+                                OnClickArmoury();
+                                break;
+                            }
                         break;
+                    }
                     if (res.gameObject.name.Contains("CardBackground"))
                     {
                         
@@ -738,7 +807,18 @@ public class OffGameManager : MonoBehaviour
                 if(res.gameObject.transform.parent != null)
                 {
                     if (res.gameObject.name.Contains("Transform"))
+                    {
+                        var cardName = res.gameObject.transform.parent.GetChild(0).gameObject.GetComponentInChildren<TextMeshProUGUI>(true).text;
+                        foreach (var c in players[playerIDs[0] - 1].deck)
+                            if (c.name.Equals(cardName))
+                            {
+                                if(c.IsWeapon())
+                                    c.TransformCard();
+                                mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleShowCards(players[playerIDs[0]-1]);
+                                break;
+                            }
                         break;
+                    }
                     if(res.gameObject.name.Contains("CardBackground"))
                     {
                         string objName;
@@ -801,6 +881,7 @@ public class OffGameManager : MonoBehaviour
     public void SetupCards()
     {
         cards.ReadCards();
+        cards.ReadTransforms();
         cards.SetupDeck();
         cards.SetupTopDeck(players.Count);
     }
@@ -826,6 +907,7 @@ public class OffGameManager : MonoBehaviour
         Debug.Log("IDs before update");
         foreach (var i in playerIDs)
             Debug.Log(i);
+        /*
         if (playerIDs[0] >= maxId)
             ShiftPlayers();
         else
@@ -833,7 +915,8 @@ public class OffGameManager : MonoBehaviour
             int id = playerIDs[0];
             playerIDs[0] = playerIDs[id];
             playerIDs[id] = id;
-        }
+        }*/
+        ShiftPlayers();
         Debug.Log("IDs after update");
         foreach (var i in playerIDs)
             Debug.Log(i);
@@ -886,19 +969,71 @@ public class OffGameManager : MonoBehaviour
     public void OnClickArmoury()
     {
         if (armouryEmpty.activeInHierarchy)
-            armouryEmpty.SetActive(false);
+        {
+            if(!StateHandler.IsDreamingState(state))
+                armouryEmpty.SetActive(false);
+            else
+            {
+                GameObject tmp;
+                for (int i = 0; i < cards.topDeck.Count; ++i)
+                {
+                    tmp = armouryEmpty.transform.GetChild(i).gameObject;
+                    tmp.SetActive(true);
+                    tmp.GetComponentInChildren<CardPrefab>(true).UpdateCard(cards.topDeck[i]);
+                }
+            }
+        }
         else
         {
             armouryEmpty.SetActive(true);
             for (int i = 0; i < armouryEmpty.transform.childCount; ++i)
                 armouryEmpty.transform.GetChild(i).gameObject.SetActive(false);
             GameObject tmp;
-            for(int i=0;i<cards.topDeck.Count;++i)
+            for (int i = 0; i < cards.topDeck.Count; ++i)
             {
                 tmp = armouryEmpty.transform.GetChild(i).gameObject;
                 tmp.SetActive(true);
                 tmp.GetComponentInChildren<CardPrefab>(true).UpdateCard(cards.topDeck[i]);
             }
         }
+    }
+
+    public void HandleWinners()
+    {
+        foreach (var player in players)
+            player.GetTotalPoints();
+
+        PlayerOffline p;
+        for(int i=0;i<players.Count -1;++i)
+            for(int j=i+1;j<players.Count;++j)
+                if(players[i].totalPoints < players[j].totalPoints)
+                {
+                    p = players[i];
+                    players[i] = players[j];
+                    players[j] = p;
+                }
+
+        GameObject tmp;
+        for(int i=0;i<players.Count;++i)
+        {
+            tmp = Instantiate(winnerPrefab, winnerEmpty.transform);
+            tmp.GetComponentInChildren<WInnerPrefab>(true).UpdateWinner(players[i], i + 1);
+        }
+
+    }
+
+    public void ClearPlayers()
+    {
+        staticPlayers.Clear();
+    }
+
+    public void EffectHandler(CardOffline card)
+    {
+
+    }
+
+    public void EffectHandler()
+    {
+
     }
 }

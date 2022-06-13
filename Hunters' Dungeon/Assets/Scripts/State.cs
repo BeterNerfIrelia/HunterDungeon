@@ -47,6 +47,36 @@ public enum State
 public class StateHandler
 {
 
+    public static bool IsDiscardingState(State state)
+    {
+        switch(state)
+        {
+            case State.HUNTER_DREAM_DISCARD1:
+            case State.HUNTER_DREAM_DISCARD2:
+            case State.HUNTER_DREAM_DISCARD3:
+            case State.HUNTER_DREAM_DISCARD4:
+            case State.HUNTER_DREAM_DISCARD5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static bool IsDreamingState(State state)
+    {
+        switch (state)
+        {
+            case State.HUNTER_DREAM1:
+            case State.HUNTER_DREAM2:
+            case State.HUNTER_DREAM3:
+            case State.HUNTER_DREAM4:
+            case State.HUNTER_DREAM5:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static bool IsChoosingState(State state)
     {
         switch(state)
@@ -95,9 +125,17 @@ public class StateHandler
             case State.HUNTER_ATTACK4:
                 return State.HUNTER_ATTACK5;
             case State.HUNTER_DREAM1:
-                return State.HUNTER_DREAM2;
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM2;
+                    return State.HUNTER_DREAM_DISCARD;
+                }
             case State.HUNTER_DREAM2:
-                return State.HUNTER_DREAM3;
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM3;
+                    return State.HUNTER_DREAM_DISCARD;
+                }
             case State.HUNTER_DREAM3:
                 {
                     if (OffGameManager.dreams.Count > 0)
@@ -113,9 +151,17 @@ public class StateHandler
             case State.HUNTER_DREAM5:
                 return State.HUNTER_DREAM_DISCARD;
             case State.HUNTER_DREAM_DISCARD1:
-                return State.HUNTER_DREAM_DISCARD2;
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM_DISCARD2;
+                    return State.ROUND_END;
+                }
             case State.HUNTER_DREAM_DISCARD2:
-                return State.HUNTER_DREAM_DISCARD3;
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.HUNTER_DREAM_DISCARD3;
+                    return State.ROUND_END;
+                }
             case State.HUNTER_DREAM_DISCARD3:
                 {
                     if(OffGameManager.dreams.Count > 0)

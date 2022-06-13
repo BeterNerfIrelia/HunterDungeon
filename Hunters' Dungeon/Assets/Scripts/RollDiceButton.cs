@@ -26,6 +26,7 @@ public class RollDiceButton : MonoBehaviour
     private void Start()
     {
         rollText.text = "Press the roll button.";
+        diceImage.sprite = initialSprite;
     }
 
     private void Update()

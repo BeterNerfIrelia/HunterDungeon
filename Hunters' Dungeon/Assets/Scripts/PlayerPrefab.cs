@@ -15,11 +15,13 @@ public class PlayerPrefab : MonoBehaviour
     public TextMeshProUGUI slimeValue;
     public TextMeshProUGUI skullValue;
     public TextMeshProUGUI clawValue;
-
+    public TextMeshProUGUI transformsCount;
+    
     public GameObject trophies;
 
     public GameObject cardSpace;
     public GameObject cardPrefab;
+    public Image firstPlayer;
 
 
     List<CardOffline> playerCards = new List<CardOffline>();
@@ -43,13 +45,22 @@ public class PlayerPrefab : MonoBehaviour
         skullValue.text = player.trophies[1].levels[player.trophies[1].level].ToString();
         clawValue.text = player.trophies[2].levels[player.trophies[2].level].ToString();
 
+        transformsCount.text = player.transforms.ToString();
+
         playerHealth.text = player.health.ToString();
         playerName.text = player.name;
-
+        if (player.order != 0)
+            firstPlayer.gameObject.SetActive(false);
+        else
+            firstPlayer.gameObject.SetActive(true);
     }
 
     public void HandleDreamCards(PlayerOffline player)
     {
+        if (player.order != 0)
+            firstPlayer.gameObject.SetActive(false);
+        else
+            firstPlayer.gameObject.SetActive(true);
         if (cardSpace.activeInHierarchy)
         {
             cardSpace.SetActive(false);
@@ -73,10 +84,14 @@ public class PlayerPrefab : MonoBehaviour
 
     public void HandleDiscardCards(PlayerOffline player)
     {
+        if (player.order != 0)
+            firstPlayer.gameObject.SetActive(false);
+        else
+            firstPlayer.gameObject.SetActive(true);
         List<CardOffline> discardable = player.discardables;
         if (cardSpace.activeInHierarchy)
         {
-            if (!StateHandler.IsChoosingState(OffGameManager.state))
+            if (!StateHandler.IsDiscardingState(OffGameManager.state))
                 cardSpace.SetActive(false);
             else
                 HandleObjectCards(player, discardable);
@@ -90,6 +105,10 @@ public class PlayerPrefab : MonoBehaviour
 
     public void HandleShowCards(PlayerOffline player)
     {
+        if (player.order != 0)
+            firstPlayer.gameObject.SetActive(false);
+        else
+            firstPlayer.gameObject.SetActive(true);
         if (playerCards.Count != player.deck.Count)
             GetPlayerCards(player);
         if (cardSpace.activeInHierarchy)
@@ -127,7 +146,7 @@ public class PlayerPrefab : MonoBehaviour
         for (int i = 0; i < player.deck.Count; ++i)
         {
             objectCards[i].SetActive(true);
-            objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(player.deck[i], player.name);
+            objectCards[i].GetComponentInChildren<CardPrefab>().UpdateCard(player.deck[i], player);
         }
     }
 

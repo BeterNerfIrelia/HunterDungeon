@@ -22,6 +22,9 @@ public class PlayerOffline
 
     public bool hasAttacked = false;
 
+    int transfCapacity = 2;
+    public int transforms;
+
     public Modifier modifier;
 
     public List<CardOffline> deck = new List<CardOffline>(7);
@@ -42,9 +45,21 @@ public class PlayerOffline
         this.bot = bot;
 
         modifier = new Modifier();
-
+        transforms = transfCapacity;
         InitializeTrophies();
         InitializeInfo();
+    }
+
+    public void ResetTransformCards()
+    {
+        foreach (CardOffline c in deck)
+            if (c.isTransform)
+            {
+                if (c.IsWeapon())
+                {
+                    c.TransformCard();
+                }
+            }
     }
 
     public int GetTotalPoints()
@@ -96,6 +111,7 @@ public class PlayerOffline
         }
         discardedCards.Clear();
         health = maxHealth;
+        transforms = transfCapacity;
     }
 
     public void ResetClicksAndCards()
@@ -120,6 +136,7 @@ public class PlayerOffline
     {
         isDead = false;
         health = maxHealth;
+        transforms = 1;
     }
 
     public void ResetAttacked()
@@ -129,8 +146,8 @@ public class PlayerOffline
 
     public void UpdateOrder(int max)
     {
-        order++;
-        order %= max;
+        order--;
+        order = order < 0 ? max - 1 : order;
     }
 
     public bool TakeDamage(int value)
@@ -159,6 +176,7 @@ public class PlayerOffline
     public void ChooseCard()
     {
         card = new CardOffline(deck[chosenCard]);
+
         deck.RemoveAt(chosenCard);
         discardedCards.Add(new CardOffline(card));
     }
@@ -177,5 +195,10 @@ public class PlayerOffline
         order = id;
     }
 
+    public void HandleTransformCount()
+    {
+        if (card.isTransform)
+            transforms--;
+    }
 
 }

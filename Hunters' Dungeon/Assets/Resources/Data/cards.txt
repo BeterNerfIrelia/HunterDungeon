@@ -7,7 +7,7 @@ ID;CardType;Name;Description;ImageName;damage;HasEffect;EffectType;CountType;Hun
 106;1;Tonitrus;Instant Effect: Each hunter that played a ranged weapon, gives you 1 unbanked point.;*;3;1;1;0;0;0;0
 107;1;Blades of Mercy;Instant Effect: Heal 1 health and plus 2 for each melee weapon in your used pile.;*;2;1;1;1;0;0;0
 108;1;Cosmic Parasite;Instant Effect: Deal 1 damage to the other hunters.;*;2;1;1;0;0;0;0
-109;1;Threaded Cane;You suffer 1 less damage.;*;2;1;2;0;0;0;0
+109;1;Threaded Cane;Each time you take damage, you suffer 1 less damage.;*;2;1;2;0;0;0;0
 201;2;Hunter's Pistol;If you're the only one to play this, you attack in the Instant Effects phase.;*;1;1;1;0;0;0;0
 202;2;Evelyn;Instant Effect: If you can discard 1 unbanked point, you deal +2 damage.;*;2;1;1;0;0;0;0
 203;2;Stone Fist;Instant Effect: If you're the only one to play a ranged weapon, you're immune to damage this round.;*;3;1;1;0;0;0;0

@@ -17,7 +17,8 @@ public class CardOffline
     public bool isTransform;
     public bool isImmune;
 
-    CardOffline transformedCard;
+    public TransformData tData;
+
 
     public CardOffline(int id, CardType cardType, string name, string description, string imageName, int damage, Effect effect, bool isHunterDream, bool isTransform, bool isImmune)
     {
@@ -31,6 +32,7 @@ public class CardOffline
         this.isHunterDream = isHunterDream;
         this.isTransform = isTransform;
         this.isImmune = isImmune;
+        tData = null;
     }
 
     public CardOffline(int id, CardType cardType, string name, string description, string imageName, int damage, Effect effect, Modifier modifier, bool isHunterDream, bool isTransform, bool isImmune)
@@ -46,6 +48,7 @@ public class CardOffline
         this.isHunterDream = isHunterDream;
         this.isTransform = isTransform;
         this.isImmune = isImmune;
+        tData = null;
     }
 
     public CardOffline(CardOffline card)
@@ -62,5 +65,56 @@ public class CardOffline
         isHunterDream = card.isHunterDream;
         isTransform = card.isTransform;
         isImmune = card.isImmune;
+
+        if(card.tData!=null)
+            tData = new TransformData(card.tData);
+    }
+
+    public void AddTransformCard(TransformData tData)
+    {
+        this.tData = new TransformData(tData);
+    }
+
+    public void TransformCard()
+    {
+        string c = name;
+        name = tData.name;
+        tData.name = c;
+
+        c = description;
+        description = tData.description;
+        tData.description = c;
+
+        c = imageName;
+        imageName = tData.imageName;
+        tData.imageName = c;
+
+        int d = damage;
+        damage = tData.damage;
+        tData.damage = d;
+
+        
+        Effect e = new Effect(effect);
+        
+        effect = new Effect(tData.effect);
+
+        tData.effect = new Effect(e);
+        
+        isTransform = !isTransform;
+        tData.isTransform = !isTransform;
+
+        bool f = isImmune;
+        isImmune = tData.isImmune;
+        tData.isImmune = f;
+    }
+
+    public bool IsWeapon()
+    {
+        return cardType switch
+        {
+            CardType.WEAPON_MELEE => true,
+            CardType.WEAPON_RANGED => true,
+            _ => false
+        };
     }
 }
