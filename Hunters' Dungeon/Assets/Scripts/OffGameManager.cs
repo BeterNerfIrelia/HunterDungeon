@@ -18,8 +18,6 @@ public class OffGameManager : MonoBehaviour
     public GameObject otherPlayersEmpty;
 
     public GameObject playerCardsEmpty;
-    public Button showPlayerCards;
-    public Button showDiscardCards;
 
     public GameObject currentEnemyEmpty;
     public GameObject finalBossEmpty;
@@ -79,7 +77,6 @@ public class OffGameManager : MonoBehaviour
         playerCardsEmpty.SetActive(false);
         revealCardsEmpty.SetActive(false);
         armouryEmpty.SetActive(false);
-        showDiscardCards.gameObject.SetActive(false);
 
         continueButton.gameObject.SetActive(false);
         revealCardsButton.gameObject.SetActive(false);
@@ -91,7 +88,6 @@ public class OffGameManager : MonoBehaviour
         int counter = 0;
         foreach (var p in players)
         {
-            Debug.LogFormat("{0} is {1}", p.name, p.bot ? "Bot" : "Player");
             playerIDs.Add(p.id);
             p.order = counter++;
             if (p.id > maxId)
@@ -198,7 +194,6 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ROUND_END:
                 {
-                    showPlayerCards.interactable = true;
                     revealArmouryButton.interactable = false;
                     break;
                 }
@@ -219,7 +214,6 @@ public class OffGameManager : MonoBehaviour
 
     public void HandleContinueButton()
     {
-        Debug.Log("State = " + state);
         switch(state)
         {
             case State.REVEAL_ENEMY:
@@ -233,11 +227,13 @@ public class OffGameManager : MonoBehaviour
                     state = State.CHOOSE_CARD1;
                     revealFinalBoss.interactable = false;
                     revealArmouryButton.interactable = false;
-                    showPlayerCards.interactable = false;
 
                     mainPlayer.GetComponentInChildren<PlayerPrefab>(true).HandleShowCards(players[playerIDs[0] - 1]);
                     revealCardsButton.gameObject.SetActive(true);
                     once = false;
+                    armouryEmpty.SetActive(false);
+                    finalBossEmpty.SetActive(false);
+                    firstRound = false;
                     break;
                 }
             case State.CHOOSE_CARD1:
@@ -269,20 +265,74 @@ public class OffGameManager : MonoBehaviour
             case State.REVEAL_CARDS:
                 {
                     currentEnemyEmpty.SetActive(true);
-                    state = State.ROLL_DICE;
+                    revealCardsEmpty.SetActive(false);
+                    state = State.INSTANT_EFFECT;
+                    break;
+                }
+            case State.INSTANT_EFFECT:
+                {
+                    
+                    dreams.Clear();
+                    for(int i=0;i<players.Count;++i)
+                    {
+                        if (players[playerIDs[i] - 1].card.effect.effectType == EffectType.REVEAL)
+                            dreams.Add(players[playerIDs[i] - 1]);
+                        
+                    }
+
+                    var exclude = dreams.FindAll(p => p.card.id == 201).Count;
+                    if (exclude > 1)
+                    {
+                        for (int i = 0; i < dreams.Count;)
+                        {
+                            if (dreams[i].card.id == 201)
+                                dreams.RemoveAt(i);
+                            else
+                                i++;
+                        }
+                    }
+
+                    if (dreams.Count > 0)
+                    {
+                        state = State.INSTANT_EFFECT1;
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy, dreams[0]);
+
+                        if (dreams[0].id != playerIDs[0])
+                        {
+                            bool condition = false;
+                            do
+                            {
+                                UpdateIdOrder();
+                                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                                    condition = true;
+                            } while (!condition);
+                        }
+                    }
+                    else
+                        state = State.ROLL_DICE;
+                    break;
+                }
+            case State.INSTANT_EFFECT1:
+            case State.INSTANT_EFFECT2:
+            case State.INSTANT_EFFECT3:
+            case State.INSTANT_EFFECT4:
+            case State.INSTANT_EFFECT5:
+                {
+                    HandleInstantEffectPlayer();
                     break;
                 }
             case State.ROLL_DICE:
                 {
                     continueButton.interactable = false;
+                    armouryEmpty.SetActive(false);
+                    finalBossEmpty.SetActive(false);
                     break;
                 }
             case State.ENEMY_ATTACK:
                 {
-                    firstRound = false;
                     foreach (PlayerOffline p in players)
                     {
-                        p.TakeDamage(Dice.rollValue);
+                        p.TakeDamage(Dice.rollValue, true);
                     }
 
                     
@@ -450,7 +500,6 @@ public class OffGameManager : MonoBehaviour
                     break;
                 }
         }
-        Debug.Log("After State = " + state);
     }
 
     public void HandleAttackPlayer()
@@ -474,6 +523,40 @@ public class OffGameManager : MonoBehaviour
         else
             state = State.ENEMY_ESCAPES;
         
+    }
+
+    public void HandleInstantEffectPlayer()
+    {
+        EffectHandler(dreams[0]);
+
+        dreams.RemoveAt(0);
+        if (dreams.Count > 0)
+        {
+            bool condition = false;
+            do
+            {
+                UpdateIdOrder();
+                if (dreams[0].id == playerIDs[0] || dreams[0].id == pidsBefore[0])
+                    condition = true;
+            } while (!condition);
+            currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy, dreams[0]);
+        }
+        else
+            HandleLastInstantEffectPlayer();
+
+        state = StateHandler.ChangeState(state);
+    }
+
+    public void HandleLastInstantEffectPlayer()
+    {
+        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).DisableCard();
+        bool condition = false;
+        do
+        {
+            UpdateIdOrder();
+            if (playerIDs[0] == pidsBefore[0])
+                condition = true;
+        } while (!condition);
     }
 
     public void UpdatePlayerOrder()
@@ -555,7 +638,6 @@ public class OffGameManager : MonoBehaviour
         RescaleArmoury();
 
         dreams.RemoveAt(0);
-        Debug.Log("DreamChoosing Card dreams.Count = " + dreams.Count);
         if (dreams.Count > 0)
         {
             bool condition = false;
@@ -571,7 +653,6 @@ public class OffGameManager : MonoBehaviour
 
         UpdateArmouryCards();
         state = StateHandler.ChangeState(state);
-        Debug.Log("Dream Choosing next state = " + state);
     }
 
     public void HandleChooseCommon()
@@ -644,6 +725,9 @@ public class OffGameManager : MonoBehaviour
         revealCardsButton.gameObject.SetActive(false);
         once = false;
         currentEnemyEmpty.SetActive(false);
+
+        armouryEmpty.SetActive(false);
+        finalBossEmpty.SetActive(false);
 
         foreach (PlayerOffline p in players)
             p.HandleTransformCount();
@@ -742,11 +826,9 @@ public class OffGameManager : MonoBehaviour
             {
                 if (res.gameObject.transform.parent != null)
                 {
-                    Debug.Log("Am lovit " + res.gameObject.name);
                     if (res.gameObject.name.Contains("Transform"))
                     {
                         var cardName = res.gameObject.transform.parent.GetChild(0).gameObject.GetComponentInChildren<TextMeshProUGUI>(true).text;
-                        Debug.Log("Cartea mea este " + cardName);
                         foreach (var c in cards.topDeck)
                             if (c.name.Equals(cardName))
                             {
@@ -909,9 +991,7 @@ public class OffGameManager : MonoBehaviour
 
     public void UpdateIdOrder()
     {
-        Debug.Log("IDs before update");
-        foreach (var i in playerIDs)
-            Debug.Log(i);
+
         /*
         if (playerIDs[0] >= maxId)
             ShiftPlayers();
@@ -922,9 +1002,7 @@ public class OffGameManager : MonoBehaviour
             playerIDs[id] = id;
         }*/
         ShiftPlayers();
-        Debug.Log("IDs after update");
-        foreach (var i in playerIDs)
-            Debug.Log(i);
+
     }
 
     public void HandleShowCards()
@@ -1032,13 +1110,133 @@ public class OffGameManager : MonoBehaviour
         staticPlayers.Clear();
     }
 
-    public void EffectHandler(CardOffline card)
+    public void EffectHandler(int id)
     {
 
     }
 
-    public void EffectHandler()
+    public void EffectHandler(PlayerOffline player)
     {
+        switch(player.card.id)
+        {
+            case 104:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (!p.card.IsWeapon())
+                            p.TakeDamage(2, false);
+                    break;
+                }
+            case 105:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                            p.TakeDamage(1, false);
+                    enemy.TakeDamage(player, 1, false);
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    break;
+                }
+            case 106:
+                {
+                    foreach(PlayerOffline p in players)
+                        if(p.id != player.id)
+                        {
+                            if(p.card.cardType == CardType.WEAPON_RANGED)
+                            {
+                                player.unbankedPoints += p.LostPoints(1);
+                            }
+                        }
+                    break;
+                }
+            case 107:
+                {
+                    int heal = 1;
+                    foreach (CardOffline c in player.discardedCards)
+                        if (c.cardType == CardType.WEAPON_MELEE && c.id != player.card.id)
+                            heal += 2;
+                    player.Heal(heal);
+                    break;
+                }
+            case 108:
+            case 210:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                            p.TakeDamage(1, false);
+                    break;
+                }
+            case 201:
+                {
+                    enemy.TakeDamage(player, player.card.damage, true);
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    break;
+                }
+            case 202:
+                {
+                    if(player.unbankedPoints > 1)
+                    {
+                        player.unbankedPoints -= 1;
+                        player.card.damage += 2;
+                    }
+                    break;
+                }
+            case 203:
+                {
+                    bool immune = true;
+                    foreach(PlayerOffline p in players)
+                        if(p.id != player.id)
+                            if(p.card.cardType == CardType.WEAPON_RANGED)
+                            {
+                                immune = false;
+                                break;
+                            }
+                    if (immune)
+                        player.card.isImmune = true;
+                    break;
+                }
+            case 206:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                            p.TakeDamage(2, false, true);
+                    break;
+                }
 
+            case 209:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                        {
+                            if (p.card.cardType == CardType.WEAPON_MELEE)
+                                p.TakeDamage(2, false);
+                            else
+                                if (p.card.cardType == CardType.WEAPON_RANGED)
+                                p.TakeDamage(1, false);
+                        }
+                    break;
+                }
+            case 301:
+                {
+                    player.Heal(2);
+                    player.Bank();
+                    break;
+                }
+            case 305:
+                {
+                    enemy.health += players.Count;
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    break;
+                }
+            case 306:
+                {
+                    foreach(PlayerOffline p in players)
+                    {
+                        p.TakeDamage(1, false);
+                    }
+
+                    enemy.TakeDamage(player, 1, false);
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    break;
+                }
+        }
     }
 }

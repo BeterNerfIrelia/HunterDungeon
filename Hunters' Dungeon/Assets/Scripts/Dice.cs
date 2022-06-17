@@ -70,6 +70,9 @@ public static class Dice
                         break;
                     }
             }
+
+            if (val >= 16)
+                break;
         }
 
         rollValue = val;

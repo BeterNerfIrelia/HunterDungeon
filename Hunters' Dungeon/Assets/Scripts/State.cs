@@ -117,6 +117,34 @@ public class StateHandler
                 {
                     return State.REVEAL_CARDS;
                 }
+            case State.INSTANT_EFFECT1:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.INSTANT_EFFECT2;
+                    return State.ROLL_DICE;
+                }
+            case State.INSTANT_EFFECT2:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.INSTANT_EFFECT3;
+                    return State.ROLL_DICE;
+                }
+            case State.INSTANT_EFFECT3:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.INSTANT_EFFECT4;
+                    return State.ROLL_DICE;
+                }
+            case State.INSTANT_EFFECT4:
+                {
+                    if (OffGameManager.dreams.Count > 0)
+                        return State.INSTANT_EFFECT5;
+                    return State.ROLL_DICE;
+                }
+            case State.INSTANT_EFFECT5:
+                {
+                    return State.ROLL_DICE;
+                }
             case State.HUNTER_ATTACK1:
                 return State.HUNTER_ATTACK2;
             case State.HUNTER_ATTACK2:

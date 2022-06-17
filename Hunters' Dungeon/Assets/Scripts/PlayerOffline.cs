@@ -22,7 +22,7 @@ public class PlayerOffline
 
     public bool hasAttacked = false;
 
-    int transfCapacity = 2;
+    int transfCapacity = 0;
     public int transforms;
 
     public Modifier modifier;
@@ -35,6 +35,9 @@ public class PlayerOffline
     public List<Trophy> trophies = new List<Trophy>(3);
 
     public int totalPoints = -1;
+
+    public int sufferedDamageTotal = 0;
+    public int sufferedDamageFromEnemy = 0;
 
     public PlayerOffline() { }
 
@@ -107,6 +110,7 @@ public class PlayerOffline
         unbankedPoints = 0;
         for (int i = 0; i < discardedCards.Count; ++i)
         {
+            discardedCards[i].ResetDamage();
             deck.Add(new CardOffline(discardedCards[i]));
         }
         discardedCards.Clear();
@@ -150,7 +154,26 @@ public class PlayerOffline
         order = order < 0 ? max - 1 : order;
     }
 
-    public bool TakeDamage(int value)
+    public int LostPoints(int value)
+    {
+        if(value >= unbankedPoints)
+        {
+            unbankedPoints = 0;
+            return value;
+        }
+
+        unbankedPoints -= value;
+        return value;
+    }
+
+    public void Heal(int amount)
+    {
+        health += amount;
+        if (health > maxHealth)
+            health = maxHealth;
+    }
+
+    public bool TakeDamage(int value, bool enemy)
     {
         if (!OffGameManager.firstRound)
         {
@@ -169,6 +192,38 @@ public class PlayerOffline
         }
 
         health -= value;
+        sufferedDamageTotal += value;
+        if (enemy)
+            sufferedDamageFromEnemy += value;
+
+        return isDead;
+    }
+
+    public bool TakeDamage(int value, bool enemy, bool ignore)
+    {
+        if (!OffGameManager.firstRound)
+        {
+            if (!ignore)
+            {
+                if (card.isImmune)
+                    value = 0;
+                if (card.isHunterDream)
+                    value /= 2;
+            }
+        }
+
+        if (value >= health)
+        {
+            health = 0;
+            unbankedPoints = 0;
+            isDead = true;
+            return isDead;
+        }
+
+        health -= value;
+        sufferedDamageTotal += value;
+        if (enemy)
+            sufferedDamageFromEnemy += value;
 
         return isDead;
     }
@@ -214,6 +269,8 @@ public class PlayerOffline
         foreach(CardOffline c in discardedCards)
             if (c.effect.countType != CountType.NONE)
                 c.damage = 0;
+
+        sufferedDamageTotal = sufferedDamageFromEnemy = 0;
     }
 
     public int CountCards(CountType ct)
@@ -229,6 +286,12 @@ public class PlayerOffline
             default:
                 return 0;
         }
+    }
+
+    public void Bank()
+    {
+        bankedPoints += unbankedPoints;
+        unbankedPoints = 0;
     }
 
 }

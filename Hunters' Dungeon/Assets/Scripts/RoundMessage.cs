@@ -58,6 +58,16 @@ public class RoundMessage : MonoBehaviour
                     text.text = revealChoice;
                     break;
                 }
+            case State.INSTANT_EFFECT:
+            case State.INSTANT_EFFECT1:
+            case State.INSTANT_EFFECT2:
+            case State.INSTANT_EFFECT3:
+            case State.INSTANT_EFFECT4:
+            case State.INSTANT_EFFECT5:
+                {
+                    text.text = instantEffect;
+                    break;
+                }
             case State.ROLL_DICE:
                 {
                     text.text = roll;

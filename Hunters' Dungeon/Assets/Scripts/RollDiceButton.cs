@@ -70,6 +70,7 @@ public class RollDiceButton : MonoBehaviour
     IEnumerator Rolling()
     {
         rollText.text = "Rolling...";
+        
         for(int i=0;i<20;++i)
         {
             rollValue.text = GetRandomValue(OffGameManager.enemy.diceType);
@@ -90,7 +91,6 @@ public class RollDiceButton : MonoBehaviour
         {
             rollText.text = "Roll again.";
         }
-        
         
     }
 

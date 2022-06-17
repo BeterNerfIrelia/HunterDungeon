@@ -8,8 +8,8 @@ ID;CardType;Name;Description;ImageName;damage;HasEffect;EffectType;CountType;Hun
 107;1;Transformed Blades of Mercy;Additional Effect: If you have 3 or less health, you're immune to damage.;*;2;1;1;0;0;1;1
 108;1;Transformed Cosmic Parasite;No Additional Effect;*;4;1;1;0;0;1;0
 109;1;Transformed Threaded Cane;Additional Effect: You deal 1 damage to the other hunters.;*;2;1;1;0;0;1;0
-110;1;Transformed Whirligig Saw;Additional Effect: Heal for the amount of damage dealt.;*;3;1;2;0;0;1;0
-201;2;Transformed Hunter's Pistol;Additional Effect: Heal for half the damage the enemy dealt to you.;*;1;2;1;0;0;1;0
+110;1;Transformed Saw Spear;The other hunters lose 1 unbanked point.;*;4;1;2;0;0;1;0
+201;2;Transformed Hunter's Pistol;Additional Effect: Heal for half the damage the enemy dealt to you.;*;1;1;1;0;0;1;0
 202;2;Transformed Evelyn;The bonus is changed to +3;*;2;1;1;0;0;1;0
 203;2;Transformed Stone Fist;You're immune to damage this round.;*;3;2;1;0;0;1;0
 204;2;Transformed Flamethrower;Additional Effect: They also lose 1 banked point.;*;3;1;2;0;0;1;0

@@ -19,6 +19,8 @@ public class CardOffline
 
     public TransformData tData;
 
+    int originalDamage;
+
 
     public CardOffline(int id, CardType cardType, string name, string description, string imageName, int damage, Effect effect, bool isHunterDream, bool isTransform, bool isImmune)
     {
@@ -33,6 +35,8 @@ public class CardOffline
         this.isTransform = isTransform;
         this.isImmune = isImmune;
         tData = null;
+
+        originalDamage = this.damage;
     }
 
     public CardOffline(int id, CardType cardType, string name, string description, string imageName, int damage, Effect effect, Modifier modifier, bool isHunterDream, bool isTransform, bool isImmune)
@@ -49,6 +53,8 @@ public class CardOffline
         this.isTransform = isTransform;
         this.isImmune = isImmune;
         tData = null;
+
+        originalDamage = this.damage;
     }
 
     public CardOffline(CardOffline card)
@@ -68,6 +74,8 @@ public class CardOffline
 
         if(card.tData!=null)
             tData = new TransformData(card.tData);
+
+        originalDamage = this.damage;
     }
 
     public void AddTransformCard(TransformData tData)
@@ -116,5 +124,12 @@ public class CardOffline
             CardType.WEAPON_RANGED => true,
             _ => false
         };
+    }
+
+    public void ResetDamage()
+    {
+        damage = originalDamage;
+        if (id != 207)
+            isImmune = false;
     }
 }

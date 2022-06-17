@@ -91,7 +91,7 @@ public class CardPrefab : MonoBehaviour
         if (int.Parse(damageValue.text) < 1)
         {
             damageValue.transform.parent.gameObject.SetActive(false);
-            Debug.Log("Card's effect = " + (card.effect == null ? "null" : "not null"));
+            
             if (card.effect.countType != CountType.NONE)
             {
                 damageValue.transform.parent.gameObject.SetActive(true);

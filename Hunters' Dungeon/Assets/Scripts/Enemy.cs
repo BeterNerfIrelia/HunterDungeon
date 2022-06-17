@@ -68,4 +68,27 @@ public class Enemy
         }
         return false;
     }
+
+    public bool TakeDamage(PlayerOffline player, int value, bool consume)
+    {
+        if (isDead)
+            return true;
+
+        int fullPoints = value;
+        int points = health < fullPoints ? health : fullPoints;
+        health -= points;
+
+        player.unbankedPoints += points;
+        if (consume)
+            player.hasAttacked = true;
+
+        if(health <= 0)
+        {
+            OffGameManager.enemies.RemoveEnemy();
+            isDead = true;
+            return true;
+        }
+
+        return false;
+    }
 }

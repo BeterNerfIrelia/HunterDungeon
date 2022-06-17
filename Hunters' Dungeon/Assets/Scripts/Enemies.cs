@@ -13,7 +13,7 @@ public class Enemies
 
     public int enemyIndex;
     public int deckSize;
-    public int normals = 2;
+    public int normals = 0;
     public int bosses = 2;
 
     public Dictionary<int, bool> apps;
@@ -87,7 +87,6 @@ public class Enemies
             apps[available[v].id] = true;
             count++;
         }
-
         deckSize = deck.Count;
     }
 
