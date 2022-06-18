@@ -114,6 +114,10 @@ public class CardOffline
         bool f = isImmune;
         isImmune = tData.isImmune;
         tData.isImmune = f;
+
+        d = originalDamage;
+        originalDamage = tData.originalDamage;
+        tData.originalDamage = d;
     }
 
     public bool IsWeapon()
@@ -129,6 +133,11 @@ public class CardOffline
     public void ResetDamage()
     {
         damage = originalDamage;
+        if(tData!=null)
+        {
+            tData.damage = tData.originalDamage;
+        }
+
         if (id != 207)
             isImmune = false;
     }

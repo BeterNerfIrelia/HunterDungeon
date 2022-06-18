@@ -21,8 +21,9 @@ public class PlayerOffline
     public bool isDead = false;
 
     public bool hasAttacked = false;
+    public bool hasDamaged = false;
 
-    int transfCapacity = 0;
+    int transfCapacity = 2;
     public int transforms;
 
     public Modifier modifier;
@@ -38,6 +39,8 @@ public class PlayerOffline
 
     public int sufferedDamageTotal = 0;
     public int sufferedDamageFromEnemy = 0;
+    public bool doubleDamageMelee = false;
+    public bool doubleDamageRanged = false;
 
     public PlayerOffline() { }
 
@@ -146,6 +149,7 @@ public class PlayerOffline
     public void ResetAttacked()
     {
         hasAttacked = false;
+        hasDamaged = false;
     }
 
     public void UpdateOrder(int max)
@@ -173,15 +177,29 @@ public class PlayerOffline
             health = maxHealth;
     }
 
+    public bool TakesDoubleDamage()
+    {
+        return doubleDamageMelee || doubleDamageRanged;
+    }
+
     public bool TakeDamage(int value, bool enemy)
     {
         if (!OffGameManager.firstRound)
         {
-            if (card.isImmune)
+            if (card != null && card.isImmune)
                 value = 0;
-            if (card.isHunterDream)
+            if (card != null && card.isHunterDream)
                 value /= 2;
         }
+
+        if (card != null)
+        {
+            if (card.id == 109)
+                value--;
+        }
+
+        if (TakesDoubleDamage())
+            value *= 2;
 
         if(value >= health)
         {
@@ -205,12 +223,19 @@ public class PlayerOffline
         {
             if (!ignore)
             {
-                if (card.isImmune)
+                if (card != null && card.isImmune)
                     value = 0;
-                if (card.isHunterDream)
+                if (card != null && card.isHunterDream)
                     value /= 2;
+                if (card != null)
+                {
+                    if (card.id == 109)
+                        value--;
+                }
             }
         }
+
+        
 
         if (value >= health)
         {
@@ -233,7 +258,6 @@ public class PlayerOffline
         card = new CardOffline(deck[chosenCard]);
 
         deck.RemoveAt(chosenCard);
-
         if(card.effect.countType != CountType.NONE)
         {
             card.damage = CountCards(card.effect.countType);
@@ -271,6 +295,7 @@ public class PlayerOffline
                 c.damage = 0;
 
         sufferedDamageTotal = sufferedDamageFromEnemy = 0;
+        doubleDamageMelee = doubleDamageRanged = false;
     }
 
     public int CountCards(CountType ct)
@@ -278,9 +303,9 @@ public class PlayerOffline
         switch(ct)
         {
             case CountType.MELEE:
-                return discardedCards.FindAll(c => c.effect.countType == CountType.MELEE).Count;
+                return discardedCards.FindAll(c => c.cardType == CardType.WEAPON_MELEE).Count;
             case CountType.RANGED:
-                return discardedCards.FindAll(c => c.effect.countType == CountType.RANGED).Count;
+                return discardedCards.FindAll(c => c.cardType == CardType.WEAPON_RANGED).Count;
             case CountType.POINTS:
                 return unbankedPoints;
             default:

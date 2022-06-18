@@ -13,6 +13,8 @@ public class TransformData
     public bool isTransform;
     public bool isImmune;
 
+    public int originalDamage = 0;
+
     public TransformData() { }
 
     public TransformData(int id, string name, string description, string imageName, int damage, Effect effect, bool isTransform, bool isImmune)
@@ -37,5 +39,6 @@ public class TransformData
         effect = new Effect(tData.effect);
         isTransform = tData.isTransform;
         isImmune = tData.isImmune;
+        originalDamage = tData.originalDamage;
     }
 }

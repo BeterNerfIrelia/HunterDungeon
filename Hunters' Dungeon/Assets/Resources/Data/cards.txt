@@ -12,10 +12,10 @@ ID;CardType;Name;Description;ImageName;damage;HasEffect;EffectType;CountType;Hun
 201;2;Hunter's Pistol;Instant Effect: If you're the only one to play this, you attack in the Instant Effects phase.;*;1;1;1;0;0;0;0
 202;2;Evelyn;Instant Effect: If you can discard 1 unbanked point, you deal +2 damage.;*;2;1;1;0;0;0;0
 203;2;Stone Fist;Instant Effect: If you're the only one to play a ranged weapon, you're immune to damage this round.;*;3;1;1;0;0;0;0
-204;2;Flamethrower;Hunters that played melee weapons take double damage.;*;2;1;2;0;0;0;0
-205;2;Rosmarinus;Hunters that played ranged weapons take double damage.;*;2;1;2;0;0;0;0
+204;2;Flamethrower;Hunters that played melee weapons take double damage.;*;2;1;1;0;0;0;0
+205;2;Rosmarinus;Hunters that played ranged weapons take double damage.;*;2;1;1;0;0;0;0
 206;2;Church Cannon;Instant Effect: Deal 2 unavoidable damage to the other hunters.;*;2;1;1;0;0;0;0
-207;2;Cyclic Pistol;You're immune to damage this round.;*;2;1;2;0;0;0;1
+207;2;Cyclic Pistol;Instant Effect: You're immune to damage this round.;*;2;1;1;0;0;0;1
 208;2;Blunderbass;Hunters that player a melee weapon deal 1 less damage.;*;2;1;1;0;0;0;0
 209;2;Gatling Gun;Instant Effect: Deal damage: 2 to melee weapons, 1 to ragned weapons.;*;2;1;1;0;0;0;0
 210;2;The Cannon;Instant Effect: Deal 1 damage to the other hunters.;*;3;1;1;0;0;0;0

@@ -49,7 +49,7 @@ public class Enemy
         isFinalBoss = enemy.isFinalBoss;
     }
 
-    public bool TakeDamage(PlayerOffline player)
+    public bool TakeDamage(PlayerOffline player, GameObject currentEnemy)
     {
         if (isDead)
             return true;
@@ -58,6 +58,7 @@ public class Enemy
         int points = health < fullPoints ? health : fullPoints;
         health -= points;
         player.hasAttacked = true;
+        player.hasDamaged = true;
         player.unbankedPoints += points;
 
         if (health <= 0)
@@ -77,7 +78,7 @@ public class Enemy
         int fullPoints = value;
         int points = health < fullPoints ? health : fullPoints;
         health -= points;
-
+        player.hasDamaged = true;
         player.unbankedPoints += points;
         if (consume)
             player.hasAttacked = true;

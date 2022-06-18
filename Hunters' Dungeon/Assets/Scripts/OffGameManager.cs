@@ -333,6 +333,10 @@ public class OffGameManager : MonoBehaviour
                     foreach (PlayerOffline p in players)
                     {
                         p.TakeDamage(Dice.rollValue, true);
+                        if (p.card.id == 110 && !p.card.isTransform)
+                        {
+                            p.card.damage += p.sufferedDamageTotal;
+                        }
                     }
 
                     
@@ -360,10 +364,11 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ENEMY_ESCAPES:
                 {
+                    HandlePistolHeal();
                     if(enemy.isDead)
                     {
                         foreach (PlayerOffline p in players)
-                            if (p.hasAttacked)
+                            if (p.hasAttacked || p.hasDamaged)
                                 p.AddTrophy(enemy.trophies);
 
                         if (enemy.isFinalBoss)
@@ -445,6 +450,7 @@ public class OffGameManager : MonoBehaviour
                     {
                         players[playerIDs[i] - 1].ResetClicksAndCards();
                         players[playerIDs[i] - 1].FillDiscardables();
+                        players[playerIDs[i] - 1].ResetTransformCards();
                         if (players[playerIDs[i] - 1].HasToDiscard())
                         {
                             dreams.Add(players[playerIDs[i] - 1]);
@@ -505,7 +511,7 @@ public class OffGameManager : MonoBehaviour
     public void HandleAttackPlayer()
     {
         EnemyPrefab ep = currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true);
-        if (enemy.TakeDamage(order[0]))
+        if (enemy.TakeDamage(order[0], currentEnemyEmpty))
         {
             state = State.ENEMY_ESCAPES;
             ep.UpdateEnemy(enemy, order[0]);
@@ -1119,11 +1125,33 @@ public class OffGameManager : MonoBehaviour
     {
         switch(player.card.id)
         {
+            case 103:
+                {
+                    if(player.card.isTransform)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                p.TakeDamage(1, false);
+                    }
+                    break;
+                }
             case 104:
                 {
                     foreach (PlayerOffline p in players)
                         if (!p.card.IsWeapon())
                             p.TakeDamage(2, false);
+                    if(player.card.isTransform)
+                    {
+                        player.TakeDamage(1, false);
+                        if(!player.isDead)
+                        {
+                            foreach (PlayerOffline p in players)
+                                if (p.id != player.id)
+                                    p.TakeDamage(2, false);
+                            enemy.TakeDamage(player, 2, false);
+                            currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                        }
+                    }
                     break;
                 }
             case 105:
@@ -1131,8 +1159,14 @@ public class OffGameManager : MonoBehaviour
                     foreach (PlayerOffline p in players)
                         if (p.id != player.id)
                             p.TakeDamage(1, false);
-                    enemy.TakeDamage(player, 1, false);
-                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    if(player.card.isTransform)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                p.TakeDamage(1, false);
+                        enemy.TakeDamage(player, 1, false);
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    }
                     break;
                 }
             case 106:
@@ -1145,6 +1179,11 @@ public class OffGameManager : MonoBehaviour
                                 player.unbankedPoints += p.LostPoints(1);
                             }
                         }
+                    if(player.card.isTransform)
+                    {
+                        int v = player.CountCards(CountType.RANGED);
+                        player.card.damage += v;
+                    }
                     break;
                 }
             case 107:
@@ -1154,14 +1193,29 @@ public class OffGameManager : MonoBehaviour
                         if (c.cardType == CardType.WEAPON_MELEE && c.id != player.card.id)
                             heal += 2;
                     player.Heal(heal);
+                    
+                    if(player.card.isTransform)
+                    {
+                        if (heal >= 5)
+                            player.card.damage += 2;
+                    }
                     break;
                 }
             case 108:
-            case 210:
                 {
                     foreach (PlayerOffline p in players)
                         if (p.id != player.id)
                             p.TakeDamage(1, false);
+                    break;
+                }
+            case 109:
+                {
+                    if(player.card.isTransform)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                p.TakeDamage(1, false);
+                    }
                     break;
                 }
             case 201:
@@ -1172,25 +1226,48 @@ public class OffGameManager : MonoBehaviour
                 }
             case 202:
                 {
-                    if(player.unbankedPoints > 1)
+                    if(player.unbankedPoints >= 1)
                     {
                         player.unbankedPoints -= 1;
                         player.card.damage += 2;
+                        if (player.card.isTransform)
+                            player.card.damage += 1;
                     }
                     break;
                 }
             case 203:
                 {
-                    bool immune = true;
+                    if (player.card.isTransform)
+                        player.card.isImmune = true;
+                    else
+                    {
+                        bool immune = true;
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                if (p.card.cardType == CardType.WEAPON_RANGED)
+                                {
+                                    immune = false;
+                                    break;
+                                }
+                        if (immune)
+                            player.card.isImmune = true;
+                    }
+                    break;
+                }
+            case 204:
+                {
                     foreach(PlayerOffline p in players)
                         if(p.id != player.id)
-                            if(p.card.cardType == CardType.WEAPON_RANGED)
-                            {
-                                immune = false;
-                                break;
-                            }
-                    if (immune)
-                        player.card.isImmune = true;
+                            if(p.card.IsWeapon() && p.card.cardType == CardType.WEAPON_MELEE)
+                                p.doubleDamageMelee = true;
+                    break;
+                }
+            case 205:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                            if (p.card.IsWeapon() && p.card.cardType == CardType.WEAPON_RANGED)
+                                p.doubleDamageRanged = true;
                     break;
                 }
             case 206:
@@ -1198,9 +1275,35 @@ public class OffGameManager : MonoBehaviour
                     foreach (PlayerOffline p in players)
                         if (p.id != player.id)
                             p.TakeDamage(2, false, true);
+                    if(player.card.isTransform)
+                    {
+                        enemy.TakeDamage(player, 1, false);
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    }
                     break;
                 }
+            case 207:
+                {
+                    player.card.isImmune = true;
+                    break;
+                }
+            case 208:
+                {
+                    foreach(PlayerOffline p in players)
+                    {
+                        if (p.id != player.id)
+                            if (p.card.IsWeapon() && p.card.cardType == CardType.WEAPON_MELEE)
+                                p.card.damage--;
+                    }
 
+                    if(player.card.isTransform)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                p.TakeDamage(1, false);
+                    }
+                    break;
+                }
             case 209:
                 {
                     foreach (PlayerOffline p in players)
@@ -1212,6 +1315,26 @@ public class OffGameManager : MonoBehaviour
                                 if (p.card.cardType == CardType.WEAPON_RANGED)
                                 p.TakeDamage(1, false);
                         }
+                    if (player.card.isTransform)
+                    {
+                        enemy.TakeDamage(player, 2, false);
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    }
+                    break;
+                }
+            case 210:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.id != player.id)
+                            p.TakeDamage(1, false);
+                    if(player.card.isTransform)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.id != player.id)
+                                p.TakeDamage(1, false);
+                        enemy.TakeDamage(player, 1, false);
+                        currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    }
                     break;
                 }
             case 301:
@@ -1238,5 +1361,15 @@ public class OffGameManager : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    public void HandlePistolHeal()
+    {
+        foreach (PlayerOffline p in players)
+            if (!p.isDead)
+            {
+                if (p.card.id == 201 && p.card.isTransform)
+                    p.Heal(p.sufferedDamageFromEnemy / 2);
+            }
     }
 }
