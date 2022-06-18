@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerOffline
 {
-    public static int maxHealth = 8;
+    public static int maxHealth = 10;
 
     public int id;
     public string name;
@@ -70,14 +70,12 @@ public class PlayerOffline
 
     public int GetTotalPoints()
     {
-        if(totalPoints < 0)
-        {
+            totalPoints = 0;
             totalPoints += unbankedPoints;
             totalPoints += bankedPoints;
             totalPoints += trophies[0].levels[trophies[0].level];
             totalPoints += trophies[1].levels[trophies[1].level];
             totalPoints += trophies[2].levels[trophies[2].level];
-        }
 
         return totalPoints;
     }
@@ -100,6 +98,12 @@ public class PlayerOffline
                 deck.RemoveAt(i);
                 return;
             }
+    }
+
+    public void DiscardCard(int pos)
+    {
+        discardedCards.Add(new CardOffline(deck[pos]));
+        deck.RemoveAt(pos);
     }
 
     public void AddCard(CardOffline c)
@@ -319,4 +323,61 @@ public class PlayerOffline
         unbankedPoints = 0;
     }
 
+    public void RecoverRandomCard()
+    {
+        if (discardedCards.Count > 0)
+        {
+            int v = Random.Range(0, discardedCards.Count);
+            CardOffline c = new CardOffline(discardedCards[v]);
+            discardedCards.RemoveAt(v);
+            c.ResetDamage();
+            if (c.isTransform)
+                c.TransformCard();
+            deck.Add(new CardOffline(c));
+        }
+    }
+
+    public void GainRandomTrophy()
+    {
+        List<Trophy> tr = trophies.FindAll(t => t.level != t.maxLevel);
+        if(tr.Count > 0)
+        {
+            int i = Random.Range(0, tr.Count);
+            tr[i].level++;
+        }
+    }
+
+    public void DiscardRandomCards(int count)
+    {
+        var ds = deck.FindAll(c => !c.isHunterDream);
+        
+        if(count >= ds.Count)
+        {
+            for (int i = 0; i < deck.Count;)
+            {
+                if (!deck[i].isHunterDream)
+                {
+                    discardedCards.Add(new CardOffline(deck[i]));
+                    deck.RemoveAt(i);
+                }
+                else
+                    i++;
+            }
+        }
+        else
+        {
+            int i = 0;
+
+            while (deck[i].isHunterDream)
+                i++;
+            discardedCards.Add(new CardOffline(deck[i]));
+            deck.RemoveAt(i);
+
+            while (deck[i].isHunterDream)
+                i++;
+            discardedCards.Add(new CardOffline(deck[i]));
+            deck.RemoveAt(i);
+
+        }
+    }
 }

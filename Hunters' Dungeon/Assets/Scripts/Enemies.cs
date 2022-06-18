@@ -7,7 +7,7 @@ public class Enemies
 {
     Modifier modifier;
 
-    List<Enemy> enemies = new List<Enemy>();
+    public List<Enemy> enemies = new List<Enemy>();
     public List<Enemy> deck = new List<Enemy>();
     public Enemy finalBoss;
 
@@ -18,6 +18,8 @@ public class Enemies
 
     public Dictionary<int, bool> apps;
 
+    List<int> testingIds = new List<int>() { 1020 };
+
     public Enemies() {
         apps = new Dictionary<int, bool>();
     }
@@ -25,6 +27,12 @@ public class Enemies
     public bool EmptyDeck()
     {
         return deckSize == 0;
+    }
+
+    public void SetupTestDeck()
+    {
+        foreach(var i in testingIds)
+            deck.Add(new Enemy(enemies.Find(e => e.id == i)));
     }
 
     public void AddHealth(int value)

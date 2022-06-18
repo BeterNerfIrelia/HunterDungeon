@@ -92,17 +92,30 @@ public class OffGameManager : MonoBehaviour
             p.order = counter++;
             if (p.id > maxId)
                 maxId = p.id;
+            p.GetTotalPoints();
         }
 
         pidsBefore = new List<int>(playerIDs);
 
-        additionalHealth = players.Count - 3;
+        additionalHealth = (players.Count - 3) * 2;
         for (int i = 1; i < players.Count; ++i)
             Instantiate(playerPrefab, otherPlayersEmpty.transform);
         SetupCards();
         SetupPlayerDecks();
         SetupEnemies();
+        enemies.finalBoss = new Enemy(enemies.enemies.Find(e => e.id == 3003));
+        if (enemies.finalBoss.effect.hasEffect)
+            if (enemies.finalBoss.effect.effectType == EffectType.REVEAL)
+                EffectHandler(enemies.finalBoss.id);
+
         finalBossEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemies.finalBoss);
+
+        foreach (var p in players)
+        {
+            p.FillDiscardables();
+            p.GetTotalPoints();
+        }
+        
     }
 
     private void Update()
@@ -131,7 +144,8 @@ public class OffGameManager : MonoBehaviour
                     if(!enemyChosen)
                     {
                         enemyChosen = true;
-                        enemy = enemies.deck[enemies.GetRandomEnemy()];
+                        //enemy = enemies.deck[enemies.GetRandomEnemy()];
+                        enemy = enemies.deck[0];
                     }
                     if(!once)
                     {
@@ -224,6 +238,10 @@ public class OffGameManager : MonoBehaviour
                         p.ResetAttacked();
                     }
 
+                    if (enemy.effect.hasEffect)
+                        if (enemy.effect.effectType == EffectType.REVEAL)
+                            EffectHandler(enemy.id);
+
                     state = State.CHOOSE_CARD1;
                     revealFinalBoss.interactable = false;
                     revealArmouryButton.interactable = false;
@@ -234,6 +252,9 @@ public class OffGameManager : MonoBehaviour
                     armouryEmpty.SetActive(false);
                     finalBossEmpty.SetActive(false);
                     firstRound = false;
+
+
+
                     break;
                 }
             case State.CHOOSE_CARD1:
@@ -551,6 +572,8 @@ public class OffGameManager : MonoBehaviour
             HandleLastInstantEffectPlayer();
 
         state = StateHandler.ChangeState(state);
+        if (enemy.isDead)
+            state = State.ENEMY_ESCAPES;
     }
 
     public void HandleLastInstantEffectPlayer()
@@ -966,7 +989,8 @@ public class OffGameManager : MonoBehaviour
     public void SetupEnemies()
     {
         enemies.ReadEnemies();
-        enemies.SetupDeck();
+        //enemies.SetupDeck();
+        enemies.SetupTestDeck();
         enemies.SetupFinalBoss();
         enemies.AddHealth(additionalHealth);
     }
@@ -1118,7 +1142,195 @@ public class OffGameManager : MonoBehaviour
 
     public void EffectHandler(int id)
     {
+        switch(id)
+        {
+            case 1007:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.TakeDamage(1, true);
+                    break;
+                }
 
+            case 1008:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.LostPoints(2);
+                    break;
+                }
+            case 1010:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.discardedCards.Count >= 4)
+                            p.RecoverRandomCard();
+                    break;
+                }
+            case 1017:
+                {
+                    int mx = 0;
+                    foreach (PlayerOffline p in players)
+                        if (p.deck.Count > mx)
+                            mx = p.deck.Count;
+                    foreach (PlayerOffline p in players)
+                        if (p.deck.Count == mx)
+                            p.TakeDamage(2, true);
+                    break;
+                }
+            case 1018:
+                {
+                    int mn = players[0].totalPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints < mn)
+                            mn = p.totalPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints == mn)
+                            p.unbankedPoints += 3;
+                    break;
+                }
+            case 1019:
+                {
+                    enemy.health += players.Count;
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
+                    break;
+                }
+            case 1020:
+                {
+                    int mn = players[0].totalPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints < mn)
+                            mn = p.totalPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints == mn)
+                            p.unbankedPoints += 2;
+                    break;
+                }
+            case 3002:
+                {
+                    foreach (Enemy e in enemies.deck)
+                        e.health += 2;
+                    break;
+                }
+            case 3003:
+                {
+                    PlayerOffline.maxHealth = 8;
+                    foreach (PlayerOffline p in players)
+                        p.health = PlayerOffline.maxHealth;
+                    break;
+                }
+
+            case 1001:
+                {
+                    int mn = 100;
+                    foreach (PlayerOffline p in players)
+                        if (p.health < mn)
+                            mn = p.health;
+                    foreach (PlayerOffline p in players)
+                        if (p.health == mn)
+                            p.TakeDamage(100, false);
+                    break;
+                }
+            case 1009:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.LostPoints(3);
+                    break;
+                }
+            case 1011:
+                {
+                    int mx = 0;
+                    foreach (PlayerOffline p in players)
+                        if (p.unbankedPoints > mx)
+                            mx = p.unbankedPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.unbankedPoints == mx)
+                            p.unbankedPoints -= 5;
+                    break;
+                }
+            case 1012:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.GainRandomTrophy();
+                    break;
+                }
+            case 1013:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.TakeDamage(2, true);
+                    break;
+                }
+            case 1014:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.DiscardRandomCards(2);
+
+                    break;
+                }
+            case 1015:
+                {
+                    int mx = 0;
+                    foreach (PlayerOffline p in players)
+                        if (p.unbankedPoints > mx)
+                            mx = p.unbankedPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.unbankedPoints == mx)
+                            p.health -= 5;
+                    break;
+                }
+            case 1016:
+                {
+                    int mx = 0;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints > mx)
+                            mx = p.totalPoints;
+                    foreach (PlayerOffline p in players)
+                        if (p.totalPoints == mx)
+                            p.health -= 3;
+                    break;
+                }
+            case 2001:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.hasAttacked && p.card.damage >= 3)
+                            p.unbankedPoints += 1;
+                    break;
+                }
+            case 2003:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.hasAttacked || p.hasDamaged)
+                            p.GainRandomTrophy();
+                    break;
+                }
+            case 3001:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.Heal(2);
+                    break;
+                }
+            case 3004:
+                {
+                    foreach (PlayerOffline p in players)
+                        if (p.card.damage <= 2)
+                            p.TakeDamage(1, true);
+                    break;
+                }
+            case 3005:
+                {
+                    foreach(PlayerOffline p in players)
+                        if(p.isDead)
+                        {
+                            foreach (PlayerOffline p2 in players)
+                                if (p2.id != p.id)
+                                    p2.GainRandomTrophy();
+                        }
+                    break;
+                }
+            case 3006:
+                {
+                    foreach (PlayerOffline p in players)
+                        p.TakeDamage(1, true);
+                    break;
+                }
+        }
     }
 
     public void EffectHandler(PlayerOffline player)

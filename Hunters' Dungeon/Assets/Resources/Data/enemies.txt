@@ -1,31 +1,35 @@
 Id;Name;Description;ImageName;health;DiceType;hasEffect;EffectType;CountType;isBoss;isFinalBoss;NumberOfTrophies;<T1,T2,T3>
-1001;Enranged Brute;If this escapes: The hunter with the lowest health is killed.;*;5;2;1;3;0;0;0;1;1
-1002;Large Crawler;*;*;7;0;0;0;0;0;0;1;0
-1003;Black Crows;*;*;7;0;0;0;0;0;0;1;2
-1004;Beastial Fly;*;*;7;1;0;0;0;0;0;1;0
-1005;Brute;*;*;7;1;0;0;0;0;0;1;1
-1006;Corrupted Huntsman;*;*;6;2;0;0;0;0;0;1;2
-1007;Beast Pacient;Instant Effect: Each hunter takes 1 damage.;*;4;0;1;1;0;0;0;1;2
-1008;Giant Snake;Instant Effect: All hunters instantly lose at most 2 unbanked points.;*;6;1;1;1;0;0;0;1;0
-1009;Snake Parasite;If this escapes: All hunters lose at most 3 unbanked points.;*;4;2;1;3;0;0;0;1;0
-1010;Deformed Child;Instant Effect: Hunters with 4 or less cards, recover a used card.;*;4;0;1;1;0;0;0;1;0
-1011;Kidnapper;If this escapes: The hunters with the most unbanked points, lose at most 5.;*;5;2;1;3;0;0;0;1;1
-1012;Corrupted Cleric;If this escapes: Each hunter claims 1 random trophy.;*;5;0;1;3;0;0;0;1;2
-1013;Feral Dogs;If this escapes: Each hunter takes 2 damage.;*;5;1;1;3;0;0;0;1;2
-1014;Brain Sucker;If this escapes: Each huner discards up to 2 cards if possible.;*;5;1;1;3;0;0;0;1;0
-1015;Celestial Horror;If this escapes: The hunter with the most unbanked points takes 5 damage.;*;6;1;1;3;0;0;0;1;0
-1016;Bloodsucker;If this escapes: The hunters with the most total points take 3 damage.;*;5;0;1;3;0;0;0;1;2
-2001;Bloodletting Beast;If a hunter dealt 3 or more damage, they gain 1 unbanked point.;*;11;1;1;3;0;1;0;2;1;2
-2002;Flesh Conglomerate;If a hunter damages this, they receive 2 unbanked points.;*;11;1;1;2;0;1;0;2;0;1
-2003;Fallen King Logarius;Hunters that attacked the round this is defeated, gain 1 random trophy.;*;13;1;1;3;0;1;0;3;0;1;2
-2004;Undead Giant;Every time a hunter takes damage, they lose the same amount of unbanked points.;*;10;2;1;2;0;1;0;2;1;2
-2005;Old Lord's Watchdog;Ranged weapons deal a maximum of 1 damage.;*;12;2;1;2;0;1;0;2;0;2
-2006;Blood-starved Beast;Every time the dice rolls a "+", this heals for 1.;*;9;2;1;2;0;1;0;2;1;2
-2007;Darkbeast;Melee weapons deal a maximum of 1 damage.;*;10;1;1;2;0;1;0;2;0;2
-2008;Father Antoine;When a hunter attacks this, they take 1 damage.;*;8;2;1;2;0;1;0;2;1;2
-3001;Marie's Wet Nurse;At the end of the round, heal each other for 1 health.;*;17;1;1;3;0;1;1;3;0;1;2
-3002;The First Hunter;Every enemy has 2 more health.;*;14;1;1;2;0;1;1;3;0;1;2
-3003;Sister Amelia;The maximum health is 6;*;12;1;1;1;0;1;1;3;0;1;2
-3004;Lady Kassandra, The Prodigy Hunter;Hunters that dealt 2 or less damage take 1 damage.;*;13;1;1;2;0;1;1;3;0;1;2
-3005;Living Failure;Whenever a hunter dies, the others gain a random trophy.;*;11;1;1;2;0;1;1;3;0;1;2
-3006;The Burned Queen;After the enemy attacks, damage the hunters agian for half of the damage.;*;15;1;1;2;0;1;1;3;0;1;2
+1001;Enranged Brute;If this escapes: The hunter with the lowest health is killed.;*;6;2;1;3;0;0;0;1;1
+1002;Large Crawler;*;*;8;0;0;0;0;0;0;1;0
+1003;Black Crows;*;*;8;0;0;0;0;0;0;1;2
+1004;Beastial Fly;*;*;8;1;0;0;0;0;0;1;0
+1005;Brute;*;*;8;1;0;0;0;0;0;1;1
+1006;Corrupted Huntsman;*;*;7;2;0;0;0;0;0;1;2
+1007;Beast Pacient;Instant Effect: Each hunter takes 1 damage.;*;5;0;1;1;0;0;0;1;2
+1008;Giant Snake;Instant Effect: All hunters lose at most 2 unbanked points.;*;6;1;1;1;0;0;0;1;0
+1009;Snake Parasite;If this escapes: All hunters lose at most 3 unbanked points.;*;5;2;1;3;0;0;0;1;0
+1010;Deformed Child;Instant Effect: Hunters with 4 or less cards, recover a used card.;*;5;0;1;1;0;0;0;1;0
+1011;Kidnapper;If this escapes: The hunters with the most unbanked points, lose at most 5.;*;6;2;1;3;0;0;0;1;1
+1012;Corrupted Cleric;If this escapes: Each hunter claims 1 random trophy.;*;6;0;1;3;0;0;0;1;2
+1013;Feral Dogs;If this escapes: Each hunter takes 2 damage.;*;6;1;1;3;0;0;0;1;2
+1014;Brain Sucker;If this escapes: Each huner discards up to 2 cards if possible.;*;6;1;1;3;0;0;0;1;0
+1015;Celestial Horror;If this escapes: The hunter with the most unbanked points takes 5 damage.;*;7;1;1;3;0;0;0;1;0
+1016;Bloodsucker;If this escapes: The hunters with the most total points take 3 damage.;*;6;0;1;3;0;0;0;1;2
+1017;Infested Beast;Instant Effect: Hunters with most cards take 2 damage.;*;7;2;1;1;0;0;0;1;2
+1018;Townsfolk;Instant Effect: Hunters with the fewest points gain 3 unbanked points.;*;5;0;1;1;0;0;0;1;1
+1019;Church Giant;Instant Effect: For each hunter in the game, gain 1 health point.;*;4;0;1;1;0;0;0;1;1
+1020;Church Cleric;Instant Effect: The hunters with the fewest points gain 2 unbanked points.;*;6;0;1;1;0;0;0;1;1
+2001;Bloodletting Beast;If a hunter dealt 3 or more damage, they gain 1 unbanked point.;*;12;1;1;3;0;1;0;2;1;2
+2002;Flesh Conglomerate;If a hunter damages this, they receive 2 unbanked points.;*;12;1;1;2;0;1;0;2;0;1
+2003;Fallen King Logarius;Hunters that attacked the round this is defeated, gain 1 random trophy.;*;14;1;1;3;0;1;0;3;0;1;2
+2004;Undead Giant;Every time a hunter takes damage, they lose the same amount of unbanked points.;*;11;2;1;2;0;1;0;2;1;2
+2005;Old Lord's Watchdog;Ranged weapons deal a maximum of 1 damage.;*;13;2;1;2;0;1;0;2;0;2
+2006;Blood-starved Beast;Every time the dice rolls a "+", this heals for 1.;*;10;2;1;2;0;1;0;2;1;2
+2007;Darkbeast;Melee weapons deal a maximum of 1 damage.;*;11;1;1;2;0;1;0;2;0;2
+2008;Father Antoine;When a hunter attacks this, they take 1 damage.;*;9;2;1;2;0;1;0;2;1;2
+3001;Marie's Wet Nurse;At the end of the round, heal each other for 1 health.;*;18;1;1;3;0;1;1;3;0;1;2
+3002;The First Hunter;Every enemy has 2 more health.;*;15;1;1;1;0;1;1;3;0;1;2
+3003;Sister Amelia;The maximum health is 8;*;13;1;1;1;0;1;1;3;0;1;2
+3004;Lady Kassandra, The Prodigy Hunter;Hunters that dealt 2 or less damage take 1 damage.;*;14;1;1;3;0;1;1;3;0;1;2
+3005;Living Failure;Whenever a hunter dies, the others gain a random trophy.;*;12;1;1;3;0;1;1;3;0;1;2
+3006;The Burned Queen;After the enemy attacks, the hunters take 1 damage.;*;16;1;1;3;0;1;1;3;0;1;2
