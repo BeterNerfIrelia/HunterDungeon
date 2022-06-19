@@ -18,7 +18,7 @@ public class Enemies
 
     public Dictionary<int, bool> apps;
 
-    List<int> testingIds = new List<int>() { 1020 };
+    List<int> testingIds = new List<int>() { 2006 };
 
     public Enemies() {
         apps = new Dictionary<int, bool>();

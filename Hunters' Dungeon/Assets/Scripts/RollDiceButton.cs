@@ -90,6 +90,8 @@ public class RollDiceButton : MonoBehaviour
         else
         {
             rollText.text = "Roll again.";
+            if (OffGameManager.enemy.id == 2006)
+                OffGameManager.enemy.health++;
         }
         
     }

@@ -54,12 +54,24 @@ public class Enemy
         if (isDead)
             return true;
 
+        switch(id)
+        {
+            case 2002:
+                player.unbankedPoints += 2;
+                break;
+        }
+
         int fullPoints = player.card.damage;
         int points = health < fullPoints ? health : fullPoints;
         health -= points;
         player.hasAttacked = true;
         player.hasDamaged = true;
         player.unbankedPoints += points;
+
+        player.totalDamage += points;
+
+        if (id == 2008)
+            player.TakeDamage(1, true);
 
         if (health <= 0)
         {
@@ -75,6 +87,13 @@ public class Enemy
         if (isDead)
             return true;
 
+        switch (id)
+        {
+            case 2002:
+                player.unbankedPoints += 2;
+                break;
+        }
+
         int fullPoints = value;
         int points = health < fullPoints ? health : fullPoints;
         health -= points;
@@ -83,7 +102,12 @@ public class Enemy
         if (consume)
             player.hasAttacked = true;
 
-        if(health <= 0)
+        player.totalDamage += points;
+
+        if (id == 2008)
+            player.TakeDamage(1, true);
+
+        if (health <= 0)
         {
             OffGameManager.enemies.RemoveEnemy();
             isDead = true;

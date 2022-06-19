@@ -37,6 +37,7 @@ public class PlayerOffline
 
     public int totalPoints = -1;
 
+    public int totalDamage = 0;
     public int sufferedDamageTotal = 0;
     public int sufferedDamageFromEnemy = 0;
     public bool doubleDamageMelee = false;
@@ -207,6 +208,9 @@ public class PlayerOffline
 
         if(value >= health)
         {
+            if (OffGameManager.enemy.id == 2004)
+                LostPoints(health);
+
             health = 0;
             unbankedPoints = 0;
             isDead = true;
@@ -217,6 +221,9 @@ public class PlayerOffline
         sufferedDamageTotal += value;
         if (enemy)
             sufferedDamageFromEnemy += value;
+
+        if (OffGameManager.enemy.id == 2004)
+            LostPoints(value);
 
         return isDead;
     }
@@ -243,6 +250,9 @@ public class PlayerOffline
 
         if (value >= health)
         {
+            if (OffGameManager.enemy.id == 2004)
+                LostPoints(health);
+
             health = 0;
             unbankedPoints = 0;
             isDead = true;
@@ -253,6 +263,9 @@ public class PlayerOffline
         sufferedDamageTotal += value;
         if (enemy)
             sufferedDamageFromEnemy += value;
+
+        if (OffGameManager.enemy.id == 2004)
+            LostPoints(value);
 
         return isDead;
     }
@@ -300,6 +313,7 @@ public class PlayerOffline
 
         sufferedDamageTotal = sufferedDamageFromEnemy = 0;
         doubleDamageMelee = doubleDamageRanged = false;
+        totalDamage = 0;
     }
 
     public int CountCards(CountType ct)

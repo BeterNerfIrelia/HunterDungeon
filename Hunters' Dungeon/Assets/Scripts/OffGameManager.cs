@@ -103,7 +103,6 @@ public class OffGameManager : MonoBehaviour
         SetupCards();
         SetupPlayerDecks();
         SetupEnemies();
-        enemies.finalBoss = new Enemy(enemies.enemies.Find(e => e.id == 3003));
         if (enemies.finalBoss.effect.hasEffect)
             if (enemies.finalBoss.effect.effectType == EffectType.REVEAL)
                 EffectHandler(enemies.finalBoss.id);
@@ -115,7 +114,6 @@ public class OffGameManager : MonoBehaviour
             p.FillDiscardables();
             p.GetTotalPoints();
         }
-        
     }
 
     private void Update()
@@ -146,6 +144,7 @@ public class OffGameManager : MonoBehaviour
                         enemyChosen = true;
                         //enemy = enemies.deck[enemies.GetRandomEnemy()];
                         enemy = enemies.deck[0];
+                        //enemy.health = 3;
                     }
                     if(!once)
                     {
@@ -175,6 +174,7 @@ public class OffGameManager : MonoBehaviour
                     revealCardsEmpty.SetActive(false);
                     rollDiceButton.gameObject.SetActive(true);
                     continueButton.interactable = false;
+                    currentEnemyEmpty.GetComponentInChildren<EnemyPrefab>(true).UpdateEnemy(enemy);
                     break;
                 }
             case State.ENEMY_ATTACK:
@@ -240,7 +240,10 @@ public class OffGameManager : MonoBehaviour
 
                     if (enemy.effect.hasEffect)
                         if (enemy.effect.effectType == EffectType.REVEAL)
-                            EffectHandler(enemy.id);
+                        {
+                            if(enemy.id != enemies.finalBoss.id)
+                                EffectHandler(enemy.id);
+                        }
 
                     state = State.CHOOSE_CARD1;
                     revealFinalBoss.interactable = false;
@@ -351,12 +354,29 @@ public class OffGameManager : MonoBehaviour
                 }
             case State.ENEMY_ATTACK:
                 {
+
                     foreach (PlayerOffline p in players)
                     {
                         p.TakeDamage(Dice.rollValue, true);
                         if (p.card.id == 110 && !p.card.isTransform)
                         {
                             p.card.damage += p.sufferedDamageTotal;
+                        }
+
+                        switch(enemy.id)
+                        {
+                            case 2005:
+                                {
+                                    if (p.card.cardType == CardType.WEAPON_RANGED)
+                                        p.card.damage = 1;
+                                    break;
+                                }
+                            case 2007:
+                                {
+                                    if (p.card.cardType == CardType.WEAPON_MELEE)
+                                        p.card.damage = 1;
+                                    break;
+                                }
                         }
                     }
 
@@ -386,11 +406,26 @@ public class OffGameManager : MonoBehaviour
             case State.ENEMY_ESCAPES:
                 {
                     HandlePistolHeal();
+                    
                     if(enemy.isDead)
                     {
                         foreach (PlayerOffline p in players)
                             if (p.hasAttacked || p.hasDamaged)
                                 p.AddTrophy(enemy.trophies);
+
+                        switch(enemy.id)
+                        {
+                            case 2001:
+                            case 2003:
+                            case 3005:
+                                EffectHandler(enemy.id);
+                                break;
+                            default:
+                                break;
+                        }
+
+                        if (enemies.finalBoss.id == 3005)
+                            EffectHandler(3005);
 
                         if (enemy.isFinalBoss)
                         {
@@ -405,6 +440,20 @@ public class OffGameManager : MonoBehaviour
                         enemy = enemies.GetEnemy();
                         state = State.HUNTER_DREAM;
                         return;
+                    }
+
+                    EffectHandler(enemy.id);
+
+                    switch(enemies.finalBoss.id)
+                    {
+                        case 3001:
+                        case 3004:
+                        case 3005:
+                        case 3006:
+                            EffectHandler(enemies.finalBoss.id);
+                            break;
+                        default:
+                            break;
                     }
 
                     if(enemy.isBoss)
@@ -989,8 +1038,8 @@ public class OffGameManager : MonoBehaviour
     public void SetupEnemies()
     {
         enemies.ReadEnemies();
-        //enemies.SetupDeck();
-        enemies.SetupTestDeck();
+        enemies.SetupDeck();
+        //enemies.SetupTestDeck();
         enemies.SetupFinalBoss();
         enemies.AddHealth(additionalHealth);
     }
@@ -1242,7 +1291,9 @@ public class OffGameManager : MonoBehaviour
                             mx = p.unbankedPoints;
                     foreach (PlayerOffline p in players)
                         if (p.unbankedPoints == mx)
-                            p.unbankedPoints -= 5;
+                        {
+                            p.LostPoints(5);
+                        }
                     break;
                 }
             case 1012:
@@ -1272,7 +1323,9 @@ public class OffGameManager : MonoBehaviour
                             mx = p.unbankedPoints;
                     foreach (PlayerOffline p in players)
                         if (p.unbankedPoints == mx)
-                            p.health -= 5;
+                        {
+                            p.TakeDamage(5, true);
+                        }
                     break;
                 }
             case 1016:
@@ -1283,34 +1336,39 @@ public class OffGameManager : MonoBehaviour
                             mx = p.totalPoints;
                     foreach (PlayerOffline p in players)
                         if (p.totalPoints == mx)
-                            p.health -= 3;
+                        {
+                            p.TakeDamage(3, true);
+                        }
                     break;
                 }
             case 2001:
                 {
                     foreach (PlayerOffline p in players)
-                        if (p.hasAttacked && p.card.damage >= 3)
+                        if (p.hasAttacked && p.totalDamage >= 3)
                             p.unbankedPoints += 1;
                     break;
                 }
             case 2003:
                 {
-                    foreach (PlayerOffline p in players)
-                        if (p.hasAttacked || p.hasDamaged)
-                            p.GainRandomTrophy();
+                    if (enemy.isDead)
+                    {
+                        foreach (PlayerOffline p in players)
+                            if (p.hasAttacked || p.hasDamaged)
+                                p.GainRandomTrophy();
+                    }
                     break;
                 }
             case 3001:
                 {
                     foreach (PlayerOffline p in players)
-                        p.Heal(2);
+                        p.Heal(1);
                     break;
                 }
             case 3004:
                 {
                     foreach (PlayerOffline p in players)
-                        if (p.card.damage <= 2)
-                            p.TakeDamage(1, true);
+                        if (p.totalDamage <= 3)
+                            p.TakeDamage(2, true);
                     break;
                 }
             case 3005:
