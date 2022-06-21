@@ -6,6 +6,7 @@ using TMPro;
 
 public class CardPrefab : MonoBehaviour
 {
+    public Image cardBackground;
     public TextMeshProUGUI cardName;
     public Image cardImage;
     public TextMeshProUGUI damageValue;
@@ -20,6 +21,7 @@ public class CardPrefab : MonoBehaviour
 
     public void UpdateCard(PlayerOffline player)
     {
+        cardBackground.color = GetColour(player.card.cardType);
         cardName.text = player.card.name;
         cardImage.sprite = null;
         damageValue.text = player.card.damage.ToString();
@@ -51,6 +53,7 @@ public class CardPrefab : MonoBehaviour
 
     public void UpdateCard(CardOffline card, string playerName)
     {
+        cardBackground.color = GetColour(card.cardType);
         cardName.text = card.name;
         cardImage.sprite = null;
         damageValue.text = card.damage.ToString();
@@ -85,6 +88,7 @@ public class CardPrefab : MonoBehaviour
 
     public void UpdateCard(CardOffline card, PlayerOffline player)
     {
+        cardBackground.color = GetColour(card.cardType);
         cardName.text = card.name;
         cardImage.sprite = null;
         damageValue.text = card.damage.ToString();
@@ -118,6 +122,7 @@ public class CardPrefab : MonoBehaviour
 
     public void UpdateCard(CardOffline card)
     {
+        cardBackground.color = GetColour(card.cardType);
         cardName.text = card.name;
         cardImage.sprite = null;
         damageValue.text = card.damage.ToString();
@@ -157,12 +162,23 @@ public class CardPrefab : MonoBehaviour
 
     CountType GetCountType(int id)
     {
+        // 6A0404
         return id switch
         {
             302 => CountType.POINTS,
             303 => CountType.MELEE,
             304 => CountType.RANGED,
             _ => CountType.NONE
+        };
+    }
+
+    Color32 GetColour(CardType ct)
+    {
+        return ct switch
+        {
+            CardType.WEAPON_MELEE => new Color32(139, 14, 14, 255),
+            CardType.WEAPON_RANGED => new Color32(0, 89, 248, 255),
+            _ => new Color32(96, 96, 96, 255)
         };
     }
 }

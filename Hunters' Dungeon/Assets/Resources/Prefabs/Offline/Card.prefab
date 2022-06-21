@@ -372,8 +372,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278453354
-  m_fontColor: {r: 0.41568628, g: 0.015686275, b: 0.015686275, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -617,6 +617,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dca0c02e6e6d4bb4094db709115ddce4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardBackground: {fileID: 2502051857067997923}
   cardName: {fileID: 3864421824662308157}
   cardImage: {fileID: 1410407000618912284}
   damageValue: {fileID: 4022735236668484609}
